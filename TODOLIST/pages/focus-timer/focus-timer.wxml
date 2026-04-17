@@ -1,0 +1,95 @@
+<!-- pages/focus-timer/focus-timer.wxml -->
+<view class="page">
+  <!-- 番茄钟计时器 -->
+  <view class="timer-section card">
+    <view class="timer-display">
+      <text class="timer-text">{{formatTime(currentTime)}}</text>
+      <text class="timer-state">{{timerStateText}}</text>
+    </view>
+    <view class="timer-controls flex-row" wx:if="{{!timerRunning}}">
+      <button class="btn btn-primary flex-1" bindtap="startTimer" disabled="{{!selectedTaskId && !noTask}}">开始专注</button>
+      <button class="btn btn-secondary ml-8" bindtap="showTaskModal">选择任务</button>
+    </view>
+    <view class="timer-controls flex-row" wx:else>
+      <button class="btn btn-danger flex-1" bindtap="pauseTimer">暂停</button>
+      <button class="btn btn-secondary ml-8" bindtap="stopTimer">结束</button>
+    </view>
+    <view class="timer-info">
+      <text>当前任务: {{currentTaskTitle || '无任务专注'}}</text>
+      <text class="text-light ml-8">预计番茄数: {{estimatedPomos}}</text>
+    </view>
+  </view>
+
+  <!-- 任务列表 -->
+  <view class="task-section">
+    <view class="task-header flex-row">
+      <text class="text-large text-bold">任务列表</text>
+      <button class="btn btn-secondary" size="mini" bindtap="showTaskModal">+ 新建任务</button>
+    </view>
+    <view wx:if="{{tasks.length === 0}}" class="empty-tips">
+      <text>暂无任务，点击上方按钮创建</text>
+    </view>
+    <view wx:else>
+      <view wx:for="{{tasks}}" wx:key="id" class="task-item card" data-index="{{index}}">
+        <view class="task-content">
+          <view class="task-title flex-row">
+            <text class="text-bold">{{item.title}}</text>
+            <text class="tag {{item.priority}}">{{item.priorityText}}</text>
+          </view>
+          <view class="task-desc">{{item.description}}</view>
+          <view class="task-meta flex-row">
+            <text>预计番茄: {{item.estimatedPomos}}</text>
+            <text class="ml-8">已完成: {{item.completedPomos}}</text>
+          </view>
+          <view class="task-progress">
+            <progress percent="{{item.progress}}" stroke-width="8" active />
+          </view>
+        </view>
+        <view class="task-actions flex-row">
+          <button class="btn btn-secondary" size="mini" bindtap="editTask" data-id="{{item.id}}">编辑</button>
+          <button class="btn btn-primary ml-8" size="mini" bindtap="selectTask" data-id="{{item.id}}">选择</button>
+          <button class="btn btn-danger ml-8" size="mini" bindtap="deleteTask" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 新建/编辑任务模态框 -->
+  <modal title="{{isEditing ? '编辑任务' : '新建任务'}}" visible="{{taskModalVisible}}" bindcancel="hideTaskModal" bindconfirm="saveTask">
+    <form slot="content">
+      <view class="form-item">
+        <text class="label">标题</text>
+        <input class="input" value="{{taskForm.title}}" placeholder="请输入任务标题" bindinput="onTaskTitleInput" />
+      </view>
+      <view class="form-item">
+        <text class="label">描述</text>
+        <textarea class="input" value="{{taskForm.description}}" placeholder="请输入任务描述" bindinput="onTaskDescInput" />
+      </view>
+      <view class="form-item">
+        <text class="label">预计番茄数</text>
+        <picker range="{{pomoOptions}}" value="{{taskForm.estimatedPomoIndex}}" bindchange="onPomoChange">
+          <view class="picker">{{pomoOptions[taskForm.estimatedPomoIndex]}} 个番茄</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="label">优先级</text>
+        <picker range="{{priorityOptions}}" value="{{taskForm.priorityIndex}}" bindchange="onPriorityChange">
+          <view class="picker">{{priorityOptions[taskForm.priorityIndex]}}</view>
+        </picker>
+      </view>
+    </form>
+  </modal>
+
+  <!-- 中断原因选择模态框 -->
+  <modal title="提前结束专注" visible="{{interruptModalVisible}}" bindcancel="hideInterruptModal" bindconfirm="confirmInterrupt">
+    <view slot="content">
+      <text>请选择中断原因：</text>
+      <radio-group bindchange="onInterruptReasonChange">
+        <label wx:for="{{interruptReasons}}" wx:key="value" class="radio-item">
+          <radio value="{{item.value}}" checked="{{interruptReason === item.value}}" />
+          <text>{{item.name}}</text>
+        </label>
+      </radio-group>
+    </view>
+  </modal>
+</view>

@@ -1,0 +1,135 @@
+<!-- pages/ai-planning/ai-planning.wxml -->
+<view class="page">
+  <!-- AI参数调节 -->
+  <view class="control-section card">
+    <view class="control-header">
+      <text class="control-title">AI规划参数</text>
+      <switch checked="{{aiEnabled}}" bindchange="toggleAI" />
+    </view>
+    <view wx:if="{{aiEnabled}}" class="control-body">
+      <view class="slider-item">
+        <text class="slider-label">紧急度权重</text>
+        <slider value="{{urgencyWeight}}" min="0" max="100" step="10" show-value bindchange="onUrgencyWeightChange" />
+      </view>
+      <view class="slider-item">
+        <text class="slider-label">重要性权重</text>
+        <slider value="{{importanceWeight}}" min="0" max="100" step="10" show-value bindchange="onImportanceWeightChange" />
+      </view>
+      <button class="btn btn-primary" bindtap="generateAIPlan">重新生成规划</button>
+    </view>
+    <view wx:else class="ai-disabled">
+      <text>AI服务暂时不可用，已切换至自主规划模式</text>
+    </view>
+  </view>
+
+  <!-- 四象限视图 -->
+  <view class="quadrant-section">
+    <view class="quadrant-grid">
+      <!-- 第一象限：重要且紧急 -->
+      <view class="quadrant quadrant-1">
+        <view class="quadrant-header">
+          <text class="quadrant-title">重要且紧急</text>
+          <text class="quadrant-count">{{quadrants[0].tasks.length}}个任务</text>
+        </view>
+        <movable-area class="task-area">
+          <movable-view wx:for="{{quadrants[0].tasks}}" wx:key="id" direction="all" inertia out-of-bounds
+            data-quadrant="0" data-index="{{index}}" bindchange="onTaskMove" bindtouchend="onTaskDrop"
+            class="task-item movable {{item.dragging ? 'dragging' : ''}}"
+            x="{{item.x}}" y="{{item.y}}" style="left: {{item.x}}px; top: {{item.y}}px;">
+            <view class="task-content">
+              <text class="task-title">{{item.title}}</text>
+              <view class="task-tags">
+                <text class="tag urgency">紧急度: {{item.urgency}}</text>
+                <text class="tag importance">重要性: {{item.importance}}</text>
+              </view>
+            </view>
+          </movable-view>
+        </movable-area>
+      </view>
+
+      <!-- 第二象限：重要不紧急 -->
+      <view class="quadrant quadrant-2">
+        <view class="quadrant-header">
+          <text class="quadrant-title">重要不紧急</text>
+          <text class="quadrant-count">{{quadrants[1].tasks.length}}个任务</text>
+        </view>
+        <movable-area class="task-area">
+          <movable-view wx:for="{{quadrants[1].tasks}}" wx:key="id" direction="all" inertia out-of-bounds
+            data-quadrant="1" data-index="{{index}}" bindchange="onTaskMove" bindtouchend="onTaskDrop"
+            class="task-item movable {{item.dragging ? 'dragging' : ''}}"
+            x="{{item.x}}" y="{{item.y}}" style="left: {{item.x}}px; top: {{item.y}}px;">
+            <view class="task-content">
+              <text class="task-title">{{item.title}}</text>
+              <view class="task-tags">
+                <text class="tag urgency">紧急度: {{item.urgency}}</text>
+                <text class="tag importance">重要性: {{item.importance}}</text>
+              </view>
+            </view>
+          </movable-view>
+        </movable-area>
+      </view>
+
+      <!-- 第三象限：紧急不重要 -->
+      <view class="quadrant quadrant-3">
+        <view class="quadrant-header">
+          <text class="quadrant-title">紧急不重要</text>
+          <text class="quadrant-count">{{quadrants[2].tasks.length}}个任务</text>
+        </view>
+        <movable-area class="task-area">
+          <movable-view wx:for="{{quadrants[2].tasks}}" wx:key="id" direction="all" inertia out-of-bounds
+            data-quadrant="2" data-index="{{index}}" bindchange="onTaskMove" bindtouchend="onTaskDrop"
+            class="task-item movable {{item.dragging ? 'dragging' : ''}}"
+            x="{{item.x}}" y="{{item.y}}" style="left: {{item.x}}px; top: {{item.y}}px;">
+            <view class="task-content">
+              <text class="task-title">{{item.title}}</text>
+              <view class="task-tags">
+                <text class="tag urgency">紧急度: {{item.urgency}}</text>
+                <text class="tag importance">重要性: {{item.importance}}</text>
+              </view>
+            </view>
+          </movable-view>
+        </movable-area>
+      </view>
+
+      <!-- 第四象限：不紧急不重要 -->
+      <view class="quadrant quadrant-4">
+        <view class="quadrant-header">
+          <text class="quadrant-title">不紧急不重要</text>
+          <text class="quadrant-count">{{quadrants[3].tasks.length}}个任务</text>
+        </view>
+        <movable-area class="task-area">
+          <movable-view wx:for="{{quadrants[3].tasks}}" wx:key="id" direction="all" inertia out-of-bounds
+            data-quadrant="3" data-index="{{index}}" bindchange="onTaskMove" bindtouchend="onTaskDrop"
+            class="task-item movable {{item.dragging ? 'dragging' : ''}}"
+            x="{{item.x}}" y="{{item.y}}" style="left: {{item.x}}px; top: {{item.y}}px;">
+            <view class="task-content">
+              <text class="task-title">{{item.title}}</text>
+              <view class="task-tags">
+                <text class="tag urgency">紧急度: {{item.urgency}}</text>
+                <text class="tag importance">重要性: {{item.importance}}</text>
+              </view>
+            </view>
+          </movable-view>
+        </movable-area>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务拆解面板 -->
+  <view class="breakdown-section card" wx:if="{{selectedTask}}">
+    <view class="breakdown-header">
+      <text class="breakdown-title">任务拆解建议</text>
+      <text class="breakdown-subtitle">针对 "{{selectedTask.title}}"</text>
+    </view>
+    <view wx:if="{{selectedTask.breakdown && selectedTask.breakdown.length > 0}}" class="breakdown-list">
+      <view wx:for="{{selectedTask.breakdown}}" wx:key="index" class="breakdown-item">
+        <text class="step-index">步骤 {{index + 1}}</text>
+        <text class="step-content">{{item}}</text>
+      </view>
+    </view>
+    <view wx:else class="empty-breakdown">
+      <text>暂无拆解建议，点击下方按钮生成</text>
+      <button class="btn btn-secondary mt-16" bindtap="generateBreakdown">生成拆解建议</button>
+    </view>
+  </view>
+</view>

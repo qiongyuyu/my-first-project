@@ -1,0 +1,212 @@
+/* pages/ai-planning/ai-planning.wxss */
+.page {
+  padding-bottom: 32rpx;
+}
+
+.control-section {
+  margin-top: 16rpx;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.control-title {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.control-body {
+  margin-top: 24rpx;
+}
+
+.slider-item {
+  margin-bottom: 32rpx;
+}
+
+.slider-label {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+.ai-disabled {
+  padding: 32rpx;
+  text-align: center;
+  color: var(--warning-color);
+  background-color: rgba(255, 195, 0, 0.1);
+  border-radius: 8rpx;
+}
+
+/* 四象限网格 */
+.quadrant-section {
+  margin-top: 24rpx;
+}
+
+.quadrant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 16rpx;
+  height: 600rpx;
+}
+
+.quadrant {
+  background-color: var(--card-bg);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.quadrant-1 {
+  border-top: 8rpx solid var(--danger-color);
+}
+
+.quadrant-2 {
+  border-top: 8rpx solid var(--primary-color);
+}
+
+.quadrant-3 {
+  border-top: 8rpx solid var(--warning-color);
+}
+
+.quadrant-4 {
+  border-top: 8rpx solid var(--text-light);
+}
+
+.quadrant-header {
+  margin-bottom: 16rpx;
+}
+
+.quadrant-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  display: block;
+}
+
+.quadrant-count {
+  font-size: 24rpx;
+  color: var(--text-light);
+}
+
+.task-area {
+  width: 100%;
+  height: calc(100% - 60rpx);
+  position: relative;
+}
+
+.task-item {
+  width: 200rpx;
+  height: 120rpx;
+  position: absolute;
+  background-color: white;
+  border-radius: 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  padding: 16rpx;
+  z-index: 1;
+}
+
+.task-item.dragging {
+  z-index: 100;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+}
+
+.task-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-title {
+  font-size: 24rpx;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 8rpx;
+}
+
+.task-tags {
+  display: flex;
+  flex-direction: column;
+}
+
+.tag {
+  font-size: 20rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  margin-right: 8rpx;
+  margin-bottom: 4rpx;
+}
+
+.tag.urgency {
+  background-color: rgba(250, 81, 81, 0.1);
+  color: var(--danger-color);
+}
+
+.tag.importance {
+  background-color: rgba(26, 173, 25, 0.1);
+  color: var(--primary-color);
+}
+
+/* 任务拆解 */
+.breakdown-section {
+  margin-top: 32rpx;
+}
+
+.breakdown-header {
+  margin-bottom: 24rpx;
+}
+
+.breakdown-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  display: block;
+}
+
+.breakdown-subtitle {
+  font-size: 24rpx;
+  color: var(--text-light);
+  display: block;
+  margin-top: 8rpx;
+}
+
+.breakdown-list {
+  margin-top: 16rpx;
+}
+
+.breakdown-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.step-index {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: var(--primary-color);
+  min-width: 120rpx;
+}
+
+.step-content {
+  font-size: 28rpx;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.empty-breakdown {
+  text-align: center;
+  padding: 48rpx;
+  color: var(--text-light);
+}

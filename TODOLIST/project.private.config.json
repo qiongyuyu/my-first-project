@@ -1,0 +1,28 @@
+{
+  "description": "私有项目配置文件",
+  "setting": {
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "enhance": true,
+    "compileHotReLoad": true,
+    "urlCheck": false,
+    "coverView": true,
+    "lazyloadPlaceholderEnable": false,
+    "skylineRenderEnable": false,
+    "preloadBackgroundData": false,
+    "autoAudits": false,
+    "useApiHook": true,
+    "showShadowRootInWxmlPanel": true,
+    "useStaticServer": false,
+    "useLanDebug": false,
+    "showES6CompileOption": false,
+    "checkInvalidKey": true,
+    "ignoreDevUnusedFiles": true,
+    "bigPackageSizeSupport": false,
+    "useIsolateContext": true
+  },
+  "projectname": "TODOLIST",
+  "libVersion": "3.15.2",
+  "condition": {}
+}

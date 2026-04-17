@@ -1,0 +1,11 @@
+<!-- components/ec-canvas/ec-canvas.wxml -->
+<view class="ec-canvas">
+  <canvas
+    canvas-id="{{canvasId}}"
+    id="{{canvasId}}"
+    class="ec-canvas"
+    bindtouchstart="{{ec.disableTouch ? '' : 'touchStart'}}"
+    bindtouchmove="{{ec.disableTouch ? '' : 'touchMove'}}"
+    bindtouchend="{{ec.disableTouch ? '' : 'touchEnd'}}"
+  ></canvas>
+</view>

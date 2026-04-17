@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"[Convert]::FromBase64String\\('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='\\) | Set-Content -Path 'test.png' -Encoding Byte -Force\")",
+      "Bash(powershell -Command '[Convert]::FromBase64String\\('\\\\''iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='\\\\''\\) | Set-Content -Path '\\\\''__TRACKED_VAR__'\\\\'' -Encoding Byte -Force')",
+      "Bash(grep -E \"\\\\.\\(jar|war|gradle|mvn|pom|yml|yaml|properties|env\\)$\")"
+    ],
+    "additionalDirectories": [
+      "D:\\java code\\todolist\\TODOLIST\\images\\tab"
+    ]
+  }
+}

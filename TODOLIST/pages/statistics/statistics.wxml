@@ -1,0 +1,64 @@
+<!-- pages/statistics/statistics.wxml -->
+<view class="page">
+  <!-- 时间选择器 -->
+  <view class="filter-section card">
+    <picker mode="selector" range="{{dateRanges}}" value="{{dateRangeIndex}}" bindchange="onDateRangeChange">
+      <view class="picker">
+        <text>{{dateRanges[dateRangeIndex]}}</text>
+        <text class="icon">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 专注时长图表 -->
+  <view class="chart-section card">
+    <view class="chart-title">专注时长统计</view>
+    <view class="chart-container">
+      <ec-canvas id="duration-chart" canvas-id="duration-chart" ec="{{ecDuration}}"></ec-canvas>
+    </view>
+  </view>
+
+  <!-- 任务类别饼图 -->
+  <view class="chart-section card">
+    <view class="chart-title">任务类别分布</view>
+    <view class="chart-container">
+      <ec-canvas id="category-chart" canvas-id="category-chart" ec="{{ecCategory}}"></ec-canvas>
+    </view>
+  </view>
+
+  <!-- 成就徽章 -->
+  <view class="achievement-section card">
+    <view class="section-header">
+      <text class="section-title">成就徽章</text>
+      <text class="section-subtitle">已解锁 {{unlockedCount}}/{{totalCount}} 个</text>
+    </view>
+    <view class="badge-grid">
+      <view wx:for="{{badges}}" wx:key="id" class="badge-item" data-index="{{index}}" bindtap="viewBadgeDetail">
+        <view class="badge-icon {{item.unlocked ? 'unlocked' : 'locked'}}">
+          <image wx:if="{{item.icon}}" src="{{item.icon}}" mode="aspectFit"></image>
+          <text wx:else class="badge-placeholder">{{item.name.charAt(0)}}</text>
+        </view>
+        <text class="badge-name">{{item.name}}</text>
+        <text class="badge-desc">{{item.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计数据概览 -->
+  <view class="stats-overview card">
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-value">{{totalFocusTime}}</text>
+        <text class="stat-label">总专注时间</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{totalPomos}}</text>
+        <text class="stat-label">总番茄数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{completionRate}}%</text>
+        <text class="stat-label">任务完成率</text>
+      </view>
+    </view>
+  </view>
+</view>

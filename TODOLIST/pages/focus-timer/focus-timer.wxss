@@ -1,0 +1,150 @@
+/* pages/focus-timer/focus-timer.wxss */
+.page {
+  padding-bottom: 32rpx;
+}
+
+.timer-section {
+  margin-top: 16rpx;
+}
+
+.timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.timer-text {
+  font-size: 72rpx;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.timer-state {
+  font-size: 24rpx;
+  color: var(--text-light);
+  margin-top: 8rpx;
+}
+
+.timer-controls {
+  margin-top: 32rpx;
+}
+
+.timer-controls button {
+  height: 80rpx;
+  line-height: 80rpx;
+}
+
+.timer-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24rpx;
+  font-size: 28rpx;
+}
+
+.task-section {
+  margin-top: 32rpx;
+}
+
+.task-header {
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.task-item {
+  margin-bottom: 24rpx;
+}
+
+.task-content {
+  margin-bottom: 24rpx;
+}
+
+.task-title {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.tag {
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  color: white;
+}
+
+.tag.high {
+  background-color: var(--danger-color);
+}
+
+.tag.medium {
+  background-color: var(--warning-color);
+}
+
+.tag.low {
+  background-color: var(--info-color);
+}
+
+.task-desc {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  margin-bottom: 16rpx;
+  line-height: 1.5;
+}
+
+.task-meta {
+  font-size: 24rpx;
+  color: var(--text-light);
+  margin-bottom: 16rpx;
+}
+
+.task-progress {
+  margin-top: 16rpx;
+}
+
+.task-actions {
+  justify-content: flex-end;
+  margin-top: 16rpx;
+}
+
+.task-actions button {
+  height: 60rpx;
+  line-height: 60rpx;
+}
+
+.empty-tips {
+  text-align: center;
+  padding: 48rpx;
+  color: var(--text-light);
+}
+
+/* 表单样式 */
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8rpx;
+  font-weight: bold;
+}
+
+.picker {
+  border: 1rpx solid var(--border-color);
+  border-radius: 8rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+}
+
+/* 单选组样式 */
+.radio-item {
+  display: flex;
+  align-items: center;
+  margin: 24rpx 0;
+}
+
+.radio-item text {
+  margin-left: 16rpx;
+}

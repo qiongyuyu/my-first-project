@@ -1,0 +1,23 @@
+{
+  "name": "timemaster-miniprogram",
+  "version": "1.0.0",
+  "description": "时光元 - 智能日程规划微信小程序",
+  "main": "app.js",
+  "scripts": {
+    "compile": "tsc",
+    "dev": "npm run compile",
+    "build": "npm run compile"
+  },
+  "keywords": [
+    "微信小程序",
+    "时间管理",
+    "番茄钟",
+    "AI规划"
+  ],
+  "author": "时光元团队",
+  "license": "MIT",
+  "devDependencies": {
+    "miniprogram-api-typings": "^3.9.0",
+    "typescript": "^4.9.0"
+  }
+}

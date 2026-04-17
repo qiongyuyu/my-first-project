@@ -1,0 +1,127 @@
+/* app.wxss */
+/* 全局样式 */
+page {
+  --primary-color: #1aad19;
+  --secondary-color: #07c160;
+  --danger-color: #fa5151;
+  --warning-color: #ffc300;
+  --info-color: #10aeff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-light: #999999;
+  --bg-color: #f8f8f8;
+  --card-bg: #ffffff;
+  --border-color: #eeeeee;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 按钮样式 */
+.btn {
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:active {
+  background-color: #0d9512;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:active {
+  background-color: #06ad56;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:active {
+  background-color: #e03e3e;
+}
+
+/* 输入框样式 */
+.input {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* 弹性布局 */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 间距 */
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.ml-8 { margin-left: 8px; }
+.mr-8 { margin-right: 8px; }
+.p-16 { padding: 16px; }
+
+/* 文本样式 */
+.text-center { text-align: center; }
+.text-bold { font-weight: bold; }
+.text-large { font-size: 18px; }
+.text-xlarge { font-size: 24px; }
+.text-small { font-size: 12px; }
+.text-light { color: var(--text-light); }
+
+/* 隐藏元素 */
+.hidden { display: none; }
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}

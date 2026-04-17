@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/focus-timer/focus-timer",
+    "pages/statistics/statistics",
+    "pages/ai-planning/ai-planning",
+    "pages/rewards/rewards",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "时光元",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1aad19",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/focus-timer/focus-timer",
+        "text": "专注",
+        "iconPath": "images/tab/focus.png",
+        "selectedIconPath": "images/tab/focus-active.png"
+      },
+      {
+        "pagePath": "pages/statistics/statistics",
+        "text": "数据",
+        "iconPath": "images/tab/statistics.png",
+        "selectedIconPath": "images/tab/statistics-active.png"
+      },
+      {
+        "pagePath": "pages/ai-planning/ai-planning",
+        "text": "规划",
+        "iconPath": "images/tab/planning.png",
+        "selectedIconPath": "images/tab/planning-active.png"
+      },
+      {
+        "pagePath": "pages/rewards/rewards",
+        "text": "激励",
+        "iconPath": "images/tab/rewards.png",
+        "selectedIconPath": "images/tab/rewards-active.png"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置",
+        "iconPath": "images/tab/settings.png",
+        "selectedIconPath": "images/tab/settings-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
