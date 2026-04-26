@@ -132,4 +132,51 @@
       <button class="btn btn-secondary mt-16" bindtap="generateBreakdown">生成拆解建议</button>
     </view>
   </view>
+
+  <!-- ═══════════════════════════════════════
+       AI 智能对话浮窗
+  ═══════════════════════════════════════ -->
+  <!-- 浮动对话按钮 -->
+  <view class="chat-fab" bindtap="toggleChat">
+    <text class="chat-fab-icon">💬</text>
+  </view>
+
+  <!-- 对话面板遮罩层 -->
+  <view class="chat-mask" wx:if="{{chatVisible}}" bindtap="toggleChat" />
+
+  <!-- 对话面板 -->
+  <view class="chat-panel" wx:if="{{chatVisible}}">
+    <!-- 头部 -->
+    <view class="chat-header">
+      <text class="chat-header-title">AI 规划助手</text>
+      <view class="chat-header-close" bindtap="toggleChat">
+        <text class="chat-close-icon">✕</text>
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <scroll-view class="chat-messages" scroll-y scroll-into-view="chat-bottom" scroll-with-animation>
+      <view wx:for="{{chatMessages}}" wx:key="id" class="chat-msg {{item.role === 'user' ? 'chat-msg-user' : 'chat-msg-ai'}}">
+        <view class="chat-msg-bubble">
+          <text class="chat-msg-text">{{item.content}}</text>
+        </view>
+        <text class="chat-msg-time">{{item.time}}</text>
+      </view>
+      <!-- 加载中 -->
+      <view class="chat-msg chat-msg-ai" wx:if="{{chatLoading}}">
+        <view class="chat-msg-bubble chat-loading-bubble">
+          <text class="chat-loading-dots">AI 思考中...</text>
+        </view>
+      </view>
+      <view id="chat-bottom" class="chat-bottom-anchor" />
+    </scroll-view>
+
+    <!-- 输入区域 -->
+    <view class="chat-input-area">
+      <input class="chat-input" value="{{chatInput}}" placeholder="输入你的问题..." bindinput="onChatInput" bindconfirm="sendMessage" confirm-type="send" />
+      <view class="chat-send-btn {{chatLoading ? 'chat-send-disabled' : ''}}" bindtap="sendMessage">
+        <text class="chat-send-text">发送</text>
+      </view>
+    </view>
+  </view>
 </view>

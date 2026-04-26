@@ -24,7 +24,7 @@
       </view>
     </view>
     <view class="progress-bar">
-      <progress percent="{{levelProgress}}" stroke-width="8" active-color="#1aad19" />
+      <progress percent="{{levelProgress}}" stroke-width="8" active-color="#9C7BC8" />
     </view>
   </view>
 

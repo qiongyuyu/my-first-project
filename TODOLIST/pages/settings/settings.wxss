@@ -1,4 +1,4 @@
-/* pages/settings/settings.wxss */
+/* pages/settings/settings.wxss — 熏衣草主题 */
 .page {
   padding-bottom: 32rpx;
 }
@@ -22,6 +22,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  border: 4rpx solid var(--lavender-pale);
 }
 
 .avatar-overlay {
@@ -58,6 +59,7 @@
   border: none;
   padding: 0;
   margin-bottom: 8rpx;
+  color: var(--lavender-dark);
 }
 
 .user-id {
@@ -73,6 +75,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 24rpx;
   display: block;
 }
@@ -109,6 +112,7 @@
 .radio-option text {
   margin-left: 8rpx;
   font-size: 26rpx;
+  color: var(--text-primary);
 }
 
 /* 滑块样式 */
@@ -131,8 +135,8 @@
 }
 
 .sync-status.success {
-  background-color: rgba(26, 173, 25, 0.1);
-  color: var(--primary-color);
+  background-color: rgba(107, 175, 138, 0.15);
+  color: var(--success-color);
 }
 
 .sync-status.failed {
@@ -141,8 +145,8 @@
 }
 
 .sync-status.pending {
-  background-color: rgba(255, 195, 0, 0.1);
-  color: var(--warning-color);
+  background-color: rgba(201, 180, 233, 0.3);
+  color: var(--lavender-dark);
 }
 
 /* 版本号 */

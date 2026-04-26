@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: timemaster-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/timemaster?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:@Qq2022152386}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api/v1
+
+jwt:
+  secret: ${JWT_SECRET:shiguangyuan-jwt-secret-key-2026-please-change-in-production}
+  expiration: 7200
+
+wechat:
+  app-id: ${WECHAT_APPID:mock-app-id}
+  app-secret: ${WECHAT_SECRET:mock-app-secret}
+  login-url: https://api.weixin.qq.com/sns/jscode2session
+
+ai:
+  service:
+    type: mock
+    enabled: ${AI_ENABLED:false}
+    api-key: ${AI_API_KEY:mock-api-key}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha

@@ -1,4 +1,4 @@
-/* pages/ai-planning/ai-planning.wxss */
+/* pages/ai-planning/ai-planning.wxss — 熏衣草主题 */
 .page {
   padding-bottom: 32rpx;
 }
@@ -17,6 +17,7 @@
 .control-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
 }
 
 .control-body {
@@ -37,9 +38,10 @@
 .ai-disabled {
   padding: 32rpx;
   text-align: center;
-  color: var(--warning-color);
-  background-color: rgba(255, 195, 0, 0.1);
-  border-radius: 8rpx;
+  color: var(--lavender-mid);
+  background-color: var(--lavender-pale);
+  border-radius: 12rpx;
+  font-size: 26rpx;
 }
 
 /* 四象限网格 */
@@ -57,26 +59,27 @@
 
 .quadrant {
   background-color: var(--card-bg);
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   padding: 24rpx;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--card-shadow);
 }
 
 .quadrant-1 {
-  border-top: 8rpx solid var(--danger-color);
+  border-top: 8rpx solid var(--lavender-dark);
 }
 
 .quadrant-2 {
-  border-top: 8rpx solid var(--primary-color);
+  border-top: 8rpx solid var(--lavender-mid);
 }
 
 .quadrant-3 {
-  border-top: 8rpx solid var(--warning-color);
+  border-top: 8rpx solid var(--lavender-light);
 }
 
 .quadrant-4 {
-  border-top: 8rpx solid var(--text-light);
+  border-top: 8rpx solid var(--lavender-pale);
 }
 
 .quadrant-header {
@@ -86,6 +89,7 @@
 .quadrant-title {
   font-size: 28rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -105,15 +109,15 @@
   height: 120rpx;
   position: absolute;
   background-color: white;
-  border-radius: 8rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(124, 92, 180, 0.12);
   padding: 16rpx;
   z-index: 1;
 }
 
 .task-item.dragging {
   z-index: 100;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8rpx 24rpx rgba(124, 92, 180, 0.25);
 }
 
 .task-content {
@@ -125,6 +129,7 @@
 .task-title {
   font-size: 24rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -145,13 +150,13 @@
 }
 
 .tag.urgency {
-  background-color: rgba(250, 81, 81, 0.1);
-  color: var(--danger-color);
+  background-color: rgba(124, 92, 180, 0.1);
+  color: var(--lavender-dark);
 }
 
 .tag.importance {
-  background-color: rgba(26, 173, 25, 0.1);
-  color: var(--primary-color);
+  background-color: rgba(156, 123, 200, 0.1);
+  color: var(--lavender-mid);
 }
 
 /* 任务拆解 */
@@ -166,6 +171,7 @@
 .breakdown-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -195,13 +201,14 @@
 .step-index {
   font-size: 24rpx;
   font-weight: bold;
-  color: var(--primary-color);
+  color: var(--lavender-mid);
   min-width: 120rpx;
 }
 
 .step-content {
   font-size: 28rpx;
   line-height: 1.5;
+  color: var(--text-primary);
   flex: 1;
 }
 
@@ -209,4 +216,208 @@
   text-align: center;
   padding: 48rpx;
   color: var(--text-light);
+}
+
+/* ═══════════════════════════════════════
+   AI 智能对话浮窗
+═══════════════════════════════════════ */
+
+/* 浮动对话按钮 */
+.chat-fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: 32rpx;
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, var(--lavender-mid) 0%, var(--lavender-dark) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(124, 92, 180, 0.4);
+  z-index: 900;
+}
+
+.chat-fab:active {
+  transform: scale(0.92);
+}
+
+.chat-fab-icon {
+  font-size: 44rpx;
+}
+
+/* 遮罩层 */
+.chat-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+}
+
+/* 对话面板 */
+.chat-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 75vh;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.15);
+  animation: chat-slide-up 0.3s ease;
+}
+
+@keyframes chat-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 头部 */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.chat-header-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--lavender-dark);
+}
+
+.chat-header-close {
+  width: 52rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5f5f5;
+}
+
+.chat-close-icon {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 消息列表 */
+.chat-messages {
+  flex: 1;
+  padding: 24rpx 32rpx;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-msg {
+  margin-bottom: 28rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-msg-user {
+  align-items: flex-end;
+}
+
+.chat-msg-ai {
+  align-items: flex-start;
+}
+
+.chat-msg-bubble {
+  max-width: 70%;
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.chat-msg-user .chat-msg-bubble {
+  background: linear-gradient(135deg, var(--lavender-mid) 0%, var(--lavender-dark) 100%);
+  color: #fff;
+  border-bottom-right-radius: 4rpx;
+}
+
+.chat-msg-ai .chat-msg-bubble {
+  background: #F5F0FF;
+  color: #444;
+  border-bottom-left-radius: 4rpx;
+}
+
+.chat-msg-text {
+  font-size: 28rpx;
+  white-space: pre-line;
+}
+
+.chat-msg-time {
+  font-size: 20rpx;
+  color: #bbb;
+  margin-top: 8rpx;
+}
+
+.chat-loading-bubble {
+  background: #F5F0FF !important;
+}
+
+.chat-loading-dots {
+  font-size: 26rpx;
+  color: var(--lavender-mid);
+}
+
+.chat-bottom-anchor {
+  height: 1rpx;
+}
+
+/* 输入区域 */
+.chat-input-area {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 32rpx;
+  border-top: 1rpx solid var(--border-color);
+  flex-shrink: 0;
+  gap: 16rpx;
+  background: #fff;
+}
+
+.chat-input {
+  flex: 1;
+  height: 72rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: 36rpx;
+  padding: 0 28rpx;
+  font-size: 28rpx;
+  background: #f8f8f8;
+  color: #333;
+}
+
+.chat-send-btn {
+  width: 120rpx;
+  height: 72rpx;
+  background: linear-gradient(135deg, var(--lavender-mid) 0%, var(--lavender-dark) 100%);
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chat-send-btn:active {
+  opacity: 0.85;
+}
+
+.chat-send-disabled {
+  opacity: 0.5;
+}
+
+.chat-send-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
 }

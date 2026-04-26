@@ -1,95 +1,200 @@
 <!-- pages/focus-timer/focus-timer.wxml -->
 <view class="page">
-  <!-- 番茄钟计时器 -->
-  <view class="timer-section card">
-    <view class="timer-display">
-      <text class="timer-text">{{formatTime(currentTime)}}</text>
-      <text class="timer-state">{{timerStateText}}</text>
-    </view>
-    <view class="timer-controls flex-row" wx:if="{{!timerRunning}}">
-      <button class="btn btn-primary flex-1" bindtap="startTimer" disabled="{{!selectedTaskId && !noTask}}">开始专注</button>
-      <button class="btn btn-secondary ml-8" bindtap="showTaskModal">选择任务</button>
-    </view>
-    <view class="timer-controls flex-row" wx:else>
-      <button class="btn btn-danger flex-1" bindtap="pauseTimer">暂停</button>
-      <button class="btn btn-secondary ml-8" bindtap="stopTimer">结束</button>
-    </view>
-    <view class="timer-info">
-      <text>当前任务: {{currentTaskTitle || '无任务专注'}}</text>
-      <text class="text-light ml-8">预计番茄数: {{estimatedPomos}}</text>
-    </view>
-  </view>
 
-  <!-- 任务列表 -->
-  <view class="task-section">
-    <view class="task-header flex-row">
-      <text class="text-large text-bold">任务列表</text>
-      <button class="btn btn-secondary" size="mini" bindtap="showTaskModal">+ 新建任务</button>
-    </view>
-    <view wx:if="{{tasks.length === 0}}" class="empty-tips">
-      <text>暂无任务，点击上方按钮创建</text>
-    </view>
-    <view wx:else>
-      <view wx:for="{{tasks}}" wx:key="id" class="task-item card" data-index="{{index}}">
-        <view class="task-content">
-          <view class="task-title flex-row">
-            <text class="text-bold">{{item.title}}</text>
-            <text class="tag {{item.priority}}">{{item.priorityText}}</text>
-          </view>
-          <view class="task-desc">{{item.description}}</view>
-          <view class="task-meta flex-row">
-            <text>预计番茄: {{item.estimatedPomos}}</text>
-            <text class="ml-8">已完成: {{item.completedPomos}}</text>
-          </view>
-          <view class="task-progress">
-            <progress percent="{{item.progress}}" stroke-width="8" active />
-          </view>
-        </view>
-        <view class="task-actions flex-row">
-          <button class="btn btn-secondary" size="mini" bindtap="editTask" data-id="{{item.id}}">编辑</button>
-          <button class="btn btn-primary ml-8" size="mini" bindtap="selectTask" data-id="{{item.id}}">选择</button>
-          <button class="btn btn-danger ml-8" size="mini" bindtap="deleteTask" data-id="{{item.id}}">删除</button>
+  <!-- ═══════════════════════════════════════
+       任务列表视图
+  ═══════════════════════════════════════ -->
+  <block wx:if="{{viewMode === 'list'}}">
+
+    <!-- 薰衣草渐变顶部栏 -->
+    <view class="custom-header" style="padding-top: {{statusBarHeight}}px">
+      <view class="header-content">
+        <text class="header-title">待办</text>
+        <view class="header-add-btn" bindtap="showTaskModal">
+          <text class="add-icon">＋</text>
         </view>
       </view>
     </view>
+
+    <!-- 任务列表 -->
+    <view class="task-list">
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{tasks.length === 0}}">
+        <text class="empty-icon">📋</text>
+        <text class="empty-text">暂无待办任务</text>
+        <text class="empty-hint">点击右上角 ＋ 添加任务，立即开始专注</text>
+      </view>
+
+      <!-- 任务卡片 -->
+      <view wx:else>
+        <view
+          wx:for="{{tasks}}"
+          wx:key="id"
+          class="task-card task-card-{{item.priority}} {{item.id === selectedTaskId ? 'task-card-active' : ''}}"
+        >
+          <!-- 顶部：标题 + 优先级标签 -->
+          <view class="task-card-top">
+            <text class="task-card-title">{{item.title}}</text>
+            <text class="priority-tag priority-{{item.priority}}">{{item.priorityText}}</text>
+          </view>
+
+          <!-- 中部：时长信息 -->
+          <view class="task-card-meta">
+            <text class="meta-item">⏱ {{item.duration || 25}} 分钟</text>
+            <text class="meta-sep">·</text>
+            <text class="meta-item">🍅 ×{{item.estimatedPomos}}</text>
+            <text class="meta-sep" wx:if="{{item.completedPomos > 0}}">·</text>
+            <text class="meta-item meta-done" wx:if="{{item.completedPomos > 0}}">✅ 已完成 {{item.completedPomos}}</text>
+            <text class="meta-item meta-deadline" wx:if="{{item.deadline}}">⏰ {{item.deadline}}</text>
+          </view>
+          <view class="task-card-desc" wx:if="{{item.description}}">
+            <text class="desc-text">{{item.description}}</text>
+          </view>
+
+          <!-- 进度条 -->
+          <view class="task-progress-wrap" wx:if="{{item.completedPomos > 0}}">
+            <view class="task-progress-track">
+              <view class="task-progress-fill" style="width: {{item.progress}}%"></view>
+            </view>
+            <text class="task-progress-pct">{{item.progress}}%</text>
+          </view>
+
+          <!-- 底部：操作区 -->
+          <view class="task-card-footer">
+            <view class="task-actions-left">
+              <view class="action-btn action-edit" bindtap="editTask" data-id="{{item.id}}">编辑</view>
+              <view class="action-btn action-delete" bindtap="deleteTask" data-id="{{item.id}}">删除</view>
+            </view>
+            <view class="start-btn" bindtap="selectAndStart" data-id="{{item.id}}">开始</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+
+  </block>
+
+  <!-- ═══════════════════════════════════════
+       番茄钟计时视图
+  ═══════════════════════════════════════ -->
+  <view class="timer-view" wx:elif="{{viewMode === 'timer'}}">
+
+    <!-- 顶部励志语录 -->
+    <view class="quote-section" style="padding-top: {{statusBarHeight + 24}}px">
+      <text class="quote-text">{{currentQuote}}</text>
+    </view>
+
+    <!-- 圆形倒计时 -->
+    <view class="circle-section">
+      <view
+        class="circle-outer"
+        style="background: conic-gradient(#9C7BC8 {{progressDeg}}deg, #DDD6ED 0deg);"
+      >
+        <view class="circle-inner">
+          <text class="timer-digits">{{formatTime(currentTime)}}</text>
+          <text class="timer-task-name" wx:if="{{currentTaskTitle}}">{{currentTaskTitle}}</text>
+          <text class="timer-state-label">{{timerStateText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部控制按钮 -->
+    <view class="timer-controls">
+      <!-- 暂停 / 继续 主按钮 -->
+      <view class="ctrl-main-btn" bindtap="pauseTimer" wx:if="{{timerRunning}}">
+        <text class="ctrl-main-text">暂停</text>
+      </view>
+      <view class="ctrl-main-btn ctrl-resume-btn" bindtap="resumeTimer" wx:elif="{{timerState === 'paused'}}">
+        <text class="ctrl-main-text">继续</text>
+      </view>
+      <view class="ctrl-main-btn" bindtap="startTimer" wx:else>
+        <text class="ctrl-main-text">开始</text>
+      </view>
+
+      <!-- 结束按钮 -->
+      <view class="ctrl-stop-btn" bindtap="stopTimer">
+        <text class="ctrl-stop-text">结束</text>
+      </view>
+    </view>
+
   </view>
 
-  <!-- 新建/编辑任务模态框 -->
-  <modal title="{{isEditing ? '编辑任务' : '新建任务'}}" visible="{{taskModalVisible}}" bindcancel="hideTaskModal" bindconfirm="saveTask">
-    <form slot="content">
-      <view class="form-item">
-        <text class="label">标题</text>
-        <input class="input" value="{{taskForm.title}}" placeholder="请输入任务标题" bindinput="onTaskTitleInput" />
+  <!-- ═══════════════════════════════════════
+       添加/编辑任务弹窗（内联实现）
+  ═══════════════════════════════════════ -->
+  <view class="task-modal" wx:if="{{taskModalVisible}}">
+    <view class="task-modal-mask" bindtap="hideTaskModal" />
+    <view class="task-modal-content">
+      <view class="task-modal-header">
+        <text class="task-modal-title">{{isEditing ? '编辑任务' : '添加任务'}}</text>
       </view>
-      <view class="form-item">
-        <text class="label">描述</text>
-        <textarea class="input" value="{{taskForm.description}}" placeholder="请输入任务描述" bindinput="onTaskDescInput" />
+      <view class="task-modal-body">
+        <view class="form-item">
+          <text class="label">任务名称</text>
+          <input class="input" value="{{taskForm.title}}" placeholder="输入任务名称" bindinput="onTaskTitleInput" focus="{{taskModalVisible && !isEditing}}" />
+        </view>
+        <view class="form-row">
+          <view class="form-item form-item-half">
+            <text class="label">优先级</text>
+            <picker range="{{priorityOptions}}" value="{{taskForm.priorityIndex}}" bindchange="onPriorityChange">
+              <view class="picker">{{priorityOptions[taskForm.priorityIndex]}}</view>
+            </picker>
+          </view>
+          <view class="form-item form-item-half">
+            <text class="label">时长（分钟）</text>
+            <picker range="{{durationOptions}}" value="{{taskForm.durationIndex}}" bindchange="onDurationChange">
+              <view class="picker">{{durationOptions[taskForm.durationIndex]}} 分钟</view>
+            </picker>
+          </view>
+        </view>
+        <view class="form-item">
+          <text class="label">预计番茄数</text>
+          <picker range="{{pomoOptions}}" value="{{taskForm.estimatedPomoIndex}}" bindchange="onPomoChange">
+            <view class="picker">{{pomoOptions[taskForm.estimatedPomoIndex]}} 个</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">截止日期 <text class="label-optional">（选填）</text></text>
+          <picker mode="date" value="{{taskForm.deadline}}" bindchange="onDeadlineChange">
+            <view class="picker {{taskForm.deadline ? '' : 'picker-placeholder'}}">{{taskForm.deadline || '请选择截止日期'}}</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <text class="label">任务描述 <text class="label-optional">（选填）</text></text>
+          <textarea class="textarea" value="{{taskForm.description}}" placeholder="描述任务详情，AI将据此提供规划建议" bindinput="onDescriptionInput" auto-height maxlength="500" />
+        </view>
       </view>
-      <view class="form-item">
-        <text class="label">预计番茄数</text>
-        <picker range="{{pomoOptions}}" value="{{taskForm.estimatedPomoIndex}}" bindchange="onPomoChange">
-          <view class="picker">{{pomoOptions[taskForm.estimatedPomoIndex]}} 个番茄</view>
-        </picker>
+      <view class="task-modal-footer">
+        <view class="task-modal-btn task-modal-btn-cancel" bindtap="hideTaskModal">取消</view>
+        <view class="task-modal-btn task-modal-btn-confirm" bindtap="saveTask">{{isEditing ? '保存' : '开始'}}</view>
       </view>
-      <view class="form-item">
-        <text class="label">优先级</text>
-        <picker range="{{priorityOptions}}" value="{{taskForm.priorityIndex}}" bindchange="onPriorityChange">
-          <view class="picker">{{priorityOptions[taskForm.priorityIndex]}}</view>
-        </picker>
-      </view>
-    </form>
-  </modal>
-
-  <!-- 中断原因选择模态框 -->
-  <modal title="提前结束专注" visible="{{interruptModalVisible}}" bindcancel="hideInterruptModal" bindconfirm="confirmInterrupt">
-    <view slot="content">
-      <text>请选择中断原因：</text>
-      <radio-group bindchange="onInterruptReasonChange">
-        <label wx:for="{{interruptReasons}}" wx:key="value" class="radio-item">
-          <radio value="{{item.value}}" checked="{{interruptReason === item.value}}" />
-          <text>{{item.name}}</text>
-        </label>
-      </radio-group>
     </view>
-  </modal>
+  </view>
+
+  <!-- ═══════════════════════════════════════
+       提前结束专注弹窗（内联实现）
+  ═══════════════════════════════════════ -->
+  <view class="task-modal" wx:if="{{interruptModalVisible}}">
+    <view class="task-modal-mask" bindtap="hideInterruptModal" />
+    <view class="task-modal-content">
+      <view class="task-modal-header">
+        <text class="task-modal-title">提前结束专注</text>
+      </view>
+      <view class="task-modal-body">
+        <text class="interrupt-hint">请选择中断原因：</text>
+        <radio-group bindchange="onInterruptReasonChange">
+          <label wx:for="{{interruptReasons}}" wx:key="value" class="radio-item">
+            <radio value="{{item.value}}" checked="{{interruptReason === item.value}}" />
+            <text>{{item.name}}</text>
+          </label>
+        </radio-group>
+      </view>
+      <view class="task-modal-footer">
+        <view class="task-modal-btn task-modal-btn-cancel" bindtap="hideInterruptModal">取消</view>
+        <view class="task-modal-btn task-modal-btn-confirm" bindtap="confirmInterrupt">确定</view>
+      </view>
+    </view>
+  </view>
+
 </view>

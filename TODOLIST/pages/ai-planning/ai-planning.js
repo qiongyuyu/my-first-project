@@ -36,7 +36,12 @@ Page({
         // 拖拽相关
         draggingTask: null,
         dragStartX: 0,
-        dragStartY: 0
+        dragStartY: 0,
+        // AI 对话相关
+        chatVisible: false,
+        chatLoading: false,
+        chatInput: '',
+        chatMessages: [],
     },
     /**
      * 生命周期函数--监听页面加载
@@ -44,6 +49,18 @@ Page({
     onLoad() {
         this.loadTasks();
         this.generateAIPlan();
+    },
+    /**
+     * 生命周期函数--监听页面显示（从其他页面返回时刷新数据）
+     */
+    onShow() {
+        this.loadTasks();
+        if (this.data.aiEnabled) {
+            this.generateAIPlan();
+        }
+        else {
+            this.generateManualPlan();
+        }
     },
     /**
      * 加载任务数据
@@ -66,9 +83,39 @@ Page({
         const importanceWeight = this.data.importanceWeight / 100;
         // 为每个任务计算紧急度和重要性分数
         const scoredTasks = tasks.map((task) => {
-            // 模拟AI评分
-            const urgency = Math.floor(Math.random() * 100); // 0-100
-            const importance = Math.floor(Math.random() * 100);
+            // 基于优先级的基础分
+            let urgencyBase, importanceBase, urgencyRange, importanceRange;
+            switch (task.priority) {
+                case 'high':
+                    urgencyBase = 75;
+                    urgencyRange = 20;
+                    importanceBase = 75;
+                    importanceRange = 20;
+                    break;
+                case 'medium':
+                    urgencyBase = 40;
+                    urgencyRange = 30;
+                    importanceBase = 55;
+                    importanceRange = 30;
+                    break;
+                case 'low':
+                    urgencyBase = 15;
+                    urgencyRange = 25;
+                    importanceBase = 15;
+                    importanceRange = 25;
+                    break;
+                default:
+                    urgencyBase = 40;
+                    urgencyRange = 30;
+                    importanceBase = 40;
+                    importanceRange = 30;
+            }
+            // 根据任务时长微调：较长的任务通常更重要
+            const durationBonus = (task.duration || 25) > 45 ? 10 : 0;
+            // 根据已完成的番茄数微调：完成越多越不紧急
+            const pomoDecay = (task.completedPomos || 0) * 5;
+            const urgency = Math.min(99, Math.max(1, urgencyBase + Math.floor(Math.random() * urgencyRange) - pomoDecay));
+            const importance = Math.min(99, Math.max(1, importanceBase + Math.floor(Math.random() * importanceRange) + durationBonus));
             // 加权综合分
             const score = urgency * urgencyWeight + importance * importanceWeight;
             return Object.assign(Object.assign({}, task), { urgency,
@@ -244,5 +291,95 @@ Page({
             title: '已生成拆解建议',
             icon: 'success'
         });
+    },
+
+    // ═══════════════════════════════════════
+    //  AI 智能对话
+    // ═══════════════════════════════════════
+
+    toggleChat() {
+        this.setData({ chatVisible: !this.data.chatVisible });
+        if (this.data.chatVisible && this.data.chatMessages.length === 0) {
+            this.addChatMessage('ai', '你好！我是你的AI规划助手。我可以帮你分析任务优先级、提供时间管理建议、拆解复杂任务。你有什么需要帮助的吗？');
+        }
+    },
+
+    onChatInput(e) {
+        this.setData({ chatInput: e.detail.value });
+    },
+
+    sendMessage() {
+        const content = this.data.chatInput.trim();
+        if (!content || this.data.chatLoading)
+            return;
+        this.addChatMessage('user', content);
+        this.setData({ chatInput: '' });
+        this.callAIApi(content);
+    },
+
+    addChatMessage(role, content) {
+        const messages = [...this.data.chatMessages, {
+            id: Date.now().toString(),
+            role,
+            content,
+            time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+        }];
+        this.setData({ chatMessages: messages });
+    },
+
+    callAIApi(userMessage) {
+        this.setData({ chatLoading: true });
+        // === 替换为真实 API 调用 ===
+        setTimeout(() => {
+            let reply = '';
+            if (userMessage.includes('紧急') || userMessage.includes('优先级')) {
+                const tasks = this.loadTasks();
+                const urgentTasks = tasks.filter((t) => t.priority === 'high' || t.priority === 'medium');
+                if (urgentTasks.length > 0) {
+                    reply = `根据你的任务列表，优先级较高的任务有：\n${urgentTasks.map((t) => `• ${t.title}（${t.priorityText}优先级）`).join('\n')}\n\n建议先完成高优先级任务，再处理其他事项。`;
+                }
+                else {
+                    reply = '目前你的任务都处于较低优先级。建议你可以利用这段时间学习新技能或处理长期项目。';
+                }
+            }
+            else if (userMessage.includes('拆解') || userMessage.includes('步骤')) {
+                const task = this.data.selectedTask;
+                if (task) {
+                    reply = `针对「${task.title}」的拆解建议：\n1. 明确最终目标\n2. 收集所需资料\n3. 制定执行计划\n4. 分配时间资源\n5. 设置检查节点\n\n需要我详细展开某个步骤吗？`;
+                }
+                else {
+                    reply = '请先在四象限中点击一个任务，我可以帮你拆解执行步骤。';
+                }
+            }
+            else if (userMessage.includes('时间') || userMessage.includes('计划')) {
+                reply = '高效时间管理建议：\n1. 使用番茄工作法，25分钟专注+5分钟休息\n2. 优先处理重要且紧急的任务\n3. 每天早晨规划当天的三件要事\n4. 定期回顾和调整计划\n\n有什么具体问题想了解的吗？';
+            }
+            else if (userMessage.includes('描述') || userMessage.includes('详情')) {
+                const tasks = this.loadTasks();
+                const hasDesc = tasks.filter((t) => t.description);
+                if (hasDesc.length > 0) {
+                    reply = `以下是有详细描述的任务：\n${hasDesc.map((t) => `• ${t.title}：${t.description}`).join('\n')}`;
+                }
+                else {
+                    reply = '目前还没有任务添加描述。你可以在添加任务时填写描述，方便AI更好地理解和规划。';
+                }
+            }
+            else if (userMessage.includes('截止') || userMessage.includes('deadline')) {
+                const tasks = this.loadTasks();
+                const hasDeadline = tasks.filter((t) => t.deadline);
+                if (hasDeadline.length > 0) {
+                    const sorted = hasDeadline.sort((a, b) => a.deadline.localeCompare(b.deadline));
+                    reply = `按截止日期排序的任务：\n${sorted.map((t) => `• ${t.title}（截止：${t.deadline}）`).join('\n')}\n\n请确保在截止日期前完成这些任务！`;
+                }
+                else {
+                    reply = '当前任务都没有设置截止日期。建议在添加任务时设定截止日期，AI可以帮你合理安排时间。';
+                }
+            }
+            else {
+                reply = '我是AI规划助手，可以帮你：\n• 分析任务优先级\n• 拆解复杂任务\n• 提供时间管理建议\n• 查看任务详情\n\n请告诉我你需要什么帮助？';
+            }
+            this.addChatMessage('ai', reply);
+            this.setData({ chatLoading: false });
+        }, 1000);
     }
 });

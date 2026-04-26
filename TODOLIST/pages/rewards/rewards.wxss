@@ -1,4 +1,4 @@
-/* pages/rewards/rewards.wxss */
+/* pages/rewards/rewards.wxss — 熏衣草主题 */
 .page {
   padding-bottom: 32rpx;
 }
@@ -16,6 +16,7 @@
   height: 120rpx;
   border-radius: 50%;
   margin-right: 32rpx;
+  border: 4rpx solid var(--lavender-pale);
 }
 
 .user-details {
@@ -25,12 +26,13 @@
 .user-name {
   font-size: 36rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 8rpx;
 }
 
 .user-level {
   font-size: 28rpx;
-  color: var(--primary-color);
+  color: var(--lavender-mid);
   font-weight: bold;
 }
 
@@ -49,7 +51,7 @@
 .stat-value {
   font-size: 40rpx;
   font-weight: bold;
-  color: var(--primary-color);
+  color: var(--lavender-mid);
 }
 
 .stat-label {
@@ -74,6 +76,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -106,13 +109,13 @@
 }
 
 .gacha-option.single {
-  background-color: rgba(26, 173, 25, 0.1);
-  border: 2rpx solid var(--primary-color);
+  background-color: rgba(156, 123, 200, 0.1);
+  border: 2rpx solid var(--lavender-mid);
 }
 
 .gacha-option.multi {
-  background-color: rgba(255, 195, 0, 0.1);
-  border: 2rpx solid var(--warning-color);
+  background-color: rgba(124, 92, 180, 0.1);
+  border: 2rpx solid var(--lavender-dark);
 }
 
 .gacha-cost {
@@ -124,7 +127,7 @@
 .cost-value {
   font-size: 48rpx;
   font-weight: bold;
-  color: var(--warning-color);
+  color: var(--lavender-dark);
 }
 
 .cost-unit {
@@ -136,6 +139,7 @@
 .gacha-name {
   font-size: 28rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 8rpx;
 }
 
@@ -151,6 +155,7 @@
 .history-title {
   font-size: 28rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
   margin-bottom: 16rpx;
 }
@@ -186,6 +191,7 @@
   text-align: center;
   padding: 48rpx;
   color: var(--text-light);
+  font-size: 26rpx;
 }
 
 .inventory-grid {
@@ -231,6 +237,7 @@
 .item-name {
   font-size: 24rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 4rpx;
 }
 
@@ -242,22 +249,22 @@
 
 .item-rarity.common {
   background-color: #f0f0f0;
-  color: #666;
+  color: #999;
 }
 
 .item-rarity.rare {
-  background-color: rgba(26, 173, 25, 0.1);
-  color: var(--primary-color);
+  background-color: rgba(156, 123, 200, 0.1);
+  color: var(--lavender-mid);
 }
 
 .item-rarity.epic {
-  background-color: rgba(161, 48, 255, 0.1);
-  color: #a130ff;
+  background-color: rgba(124, 92, 180, 0.15);
+  color: var(--lavender-dark);
 }
 
 .item-rarity.legendary {
-  background-color: rgba(255, 195, 0, 0.1);
-  color: var(--warning-color);
+  background-color: rgba(201, 180, 233, 0.3);
+  color: #6B4E9A;
 }
 
 /* 自定义奖励 */
@@ -275,6 +282,7 @@
   text-align: center;
   padding: 48rpx;
   color: var(--text-light);
+  font-size: 26rpx;
 }
 
 .rewards-list {
@@ -308,6 +316,7 @@
 .reward-title {
   font-size: 28rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
 }
 
 .reward-status {
@@ -317,13 +326,13 @@
 }
 
 .reward-status.pending {
-  background-color: rgba(255, 195, 0, 0.1);
-  color: var(--warning-color);
+  background-color: rgba(201, 180, 233, 0.3);
+  color: var(--lavender-dark);
 }
 
 .reward-status.completed {
-  background-color: rgba(26, 173, 25, 0.1);
-  color: var(--primary-color);
+  background-color: rgba(107, 175, 138, 0.15);
+  color: var(--success-color);
 }
 
 .reward-condition {
@@ -356,6 +365,7 @@
 .result-name {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 8rpx;
 }
 
@@ -368,11 +378,13 @@
   font-size: 24rpx;
   color: var(--text-secondary);
   text-align: center;
+  line-height: 1.5;
 }
 
 .result-loading {
   text-align: center;
   padding: 48rpx;
+  color: var(--text-light);
 }
 
 /* 表单样式 */
@@ -384,11 +396,15 @@
   display: block;
   margin-bottom: 8rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
+  font-size: 26rpx;
 }
 
 .picker {
   border: 1rpx solid var(--border-color);
-  border-radius: 8rpx;
+  border-radius: 12rpx;
   padding: 24rpx;
   font-size: 28rpx;
+  color: var(--text-primary);
+  background: #FAFAFA;
 }
