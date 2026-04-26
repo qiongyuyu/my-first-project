@@ -18,6 +18,6 @@
   "license": "MIT",
   "devDependencies": {
     "miniprogram-api-typings": "^3.9.0",
-    "typescript": "^4.9.0"
+    "typescript": "^6.0.0"
   }
 }

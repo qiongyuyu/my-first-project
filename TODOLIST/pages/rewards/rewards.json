@@ -1,4 +1,6 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "modal": "../../components/modal/modal"
+  },
   "navigationBarTitleText": "激励与奖励"
 }

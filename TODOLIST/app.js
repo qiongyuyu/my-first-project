@@ -4,7 +4,7 @@ App({
     globalData: {
         userInfo: null,
         token: null,
-        isConnected: true,
+        isConnected: true, // 网络状态
         offlineQueue: [], // 离线操作队列
     },
     onLaunch() {

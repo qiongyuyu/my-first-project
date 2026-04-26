@@ -168,3 +168,13 @@ TODOLIST/
 
 ---
 **时光元 © 2026** - 让时间管理变得更简单、更有趣
+
+
+
+module diliver()
+cin clk_50M;
+reg[25:0] count;
+reg clk_1;
+localparam MAX_COUNT = 25000000;
+localparam HALF_PERIOD = 12500000;
+

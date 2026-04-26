@@ -13,17 +13,17 @@ var TimerState;
     TimerState["PAUSED"] = "paused";
     TimerState["BREAK"] = "break";
     TimerState["COMPLETED"] = "completed";
-})(TimerState = exports.TimerState || (exports.TimerState = {}));
+})(TimerState || (exports.TimerState = TimerState = {}));
 var TimerType;
 (function (TimerType) {
     TimerType["FOCUS"] = "focus";
     TimerType["SHORT_BREAK"] = "short_break";
     TimerType["LONG_BREAK"] = "long_break";
-})(TimerType = exports.TimerType || (exports.TimerType = {}));
+})(TimerType || (exports.TimerType = TimerType = {}));
 const DEFAULT_CONFIG = {
-    focusDuration: 25 * 60,
-    shortBreakDuration: 5 * 60,
-    longBreakDuration: 15 * 60,
+    focusDuration: 25 * 60, // 25分钟
+    shortBreakDuration: 5 * 60, // 5分钟
+    longBreakDuration: 15 * 60, // 15分钟
     pomodorosUntilLongBreak: 4
 };
 class PomodoroTimer {

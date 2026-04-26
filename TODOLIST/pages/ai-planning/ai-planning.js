@@ -46,6 +46,18 @@ Page({
         this.generateAIPlan();
     },
     /**
+     * 生命周期函数--监听页面显示（从其他页面返回时刷新数据）
+     */
+    onShow() {
+        this.loadTasks();
+        if (this.data.aiEnabled) {
+            this.generateAIPlan();
+        }
+        else {
+            this.generateManualPlan();
+        }
+    },
+    /**
      * 加载任务数据
      */
     loadTasks() {
@@ -66,9 +78,39 @@ Page({
         const importanceWeight = this.data.importanceWeight / 100;
         // 为每个任务计算紧急度和重要性分数
         const scoredTasks = tasks.map((task) => {
-            // 模拟AI评分
-            const urgency = Math.floor(Math.random() * 100); // 0-100
-            const importance = Math.floor(Math.random() * 100);
+            // 基于优先级的基础分
+            let urgencyBase, importanceBase, urgencyRange, importanceRange;
+            switch (task.priority) {
+                case 'high':
+                    urgencyBase = 75;
+                    urgencyRange = 20;
+                    importanceBase = 75;
+                    importanceRange = 20;
+                    break;
+                case 'medium':
+                    urgencyBase = 40;
+                    urgencyRange = 30;
+                    importanceBase = 55;
+                    importanceRange = 30;
+                    break;
+                case 'low':
+                    urgencyBase = 15;
+                    urgencyRange = 25;
+                    importanceBase = 15;
+                    importanceRange = 25;
+                    break;
+                default:
+                    urgencyBase = 40;
+                    urgencyRange = 30;
+                    importanceBase = 40;
+                    importanceRange = 30;
+            }
+            // 根据任务时长微调：较长的任务通常更重要
+            const durationBonus = (task.duration || 25) > 45 ? 10 : 0;
+            // 根据已完成的番茄数微调：完成越多越不紧急
+            const pomoDecay = (task.completedPomos || 0) * 5;
+            const urgency = Math.min(99, Math.max(1, urgencyBase + Math.floor(Math.random() * urgencyRange) - pomoDecay));
+            const importance = Math.min(99, Math.max(1, importanceBase + Math.floor(Math.random() * importanceRange) + durationBonus));
             // 加权综合分
             const score = urgency * urgencyWeight + importance * importanceWeight;
             return Object.assign(Object.assign({}, task), { urgency,

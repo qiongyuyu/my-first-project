@@ -1,150 +1,510 @@
 /* pages/focus-timer/focus-timer.wxss */
+
+/* ── 薰衣草 pastel 颜色变量 ── */
+page {
+  --lavender-dark: #7B5EA7;
+  --lavender-mid: #9C7BC8;
+  --lavender-light: #C9B4E9;
+  --lavender-pale: #E8D5F5;
+  --bg: #F5F0FF;
+  --card-shadow: 0 4rpx 20rpx rgba(124, 92, 180, 0.15);
+  background-color: var(--bg);
+}
+
+/* ─────────────────────────────────
+   整体页面
+───────────────────────────────── */
 .page {
-  padding-bottom: 32rpx;
+  min-height: 100vh;
+  background-color: var(--bg);
 }
 
-.timer-section {
-  margin-top: 16rpx;
+/* ─────────────────────────────────
+   自定义顶部栏（加高版）
+───────────────────────────────── */
+.custom-header {
+  background: linear-gradient(135deg, #C9B4E9 0%, #A78AC8 100%);
+  box-shadow: 0 2rpx 16rpx rgba(167, 138, 200, 0.35);
 }
 
-.timer-display {
+.header-content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;       /* 内容贴底对齐 */
+  justify-content: space-between;
+  /* 顶部较小 padding + 底部大 padding → 内容整体下移 */
+  padding: 16rpx 36rpx 64rpx;
+}
+
+.header-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 6rpx;
+}
+
+.header-add-btn {
+  width: 72rpx;
+  height: 72rpx;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-icon {
+  font-size: 38rpx;
+  color: #fff;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* ─────────────────────────────────
+   任务列表
+───────────────────────────────── */
+.task-list {
+  padding: 28rpx 32rpx 40rpx;
+}
+
+/* 空状态 */
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32rpx;
+  justify-content: center;
+  padding: 100rpx 0;
+  gap: 18rpx;
 }
 
-.timer-text {
-  font-size: 72rpx;
-  font-weight: bold;
-  color: var(--primary-color);
+.empty-icon { font-size: 88rpx; }
+
+.empty-text {
+  font-size: 30rpx;
+  color: var(--lavender-dark);
+  font-weight: 600;
 }
 
-.timer-state {
+.empty-hint {
   font-size: 24rpx;
-  color: var(--text-light);
+  color: #B0A0C8;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ─────────────────────────────────
+   任务卡片
+───────────────────────────────── */
+.task-card {
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.task-card-high   { background: linear-gradient(135deg, #FFCDD2 0%, #F48FB1 100%); }
+.task-card-medium { background: linear-gradient(135deg, #7fa1df 0%, #919adf 100%); }
+.task-card-low    { background: linear-gradient(135deg, #B3E5FC 0%, #81D4FA 100%); }
+
+/* 选中态 */
+.task-card-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24rpx;
+  border: 3rpx solid rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+/* 卡片顶部 */
+.task-card-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.task-card-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #fff;
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* 优先级标签 */
+.priority-tag {
+  padding: 6rpx 20rpx;
+  border-radius: 40rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* 卡片元信息 */
+.task-card-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.meta-item { font-size: 24rpx; color: rgba(255, 255, 255, 0.9); }
+.meta-sep  { font-size: 24rpx; color: rgba(255, 255, 255, 0.5); }
+.meta-done { color: rgba(255, 255, 255, 0.85); }
+
+/* 进度条 */
+.task-progress-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.task-progress-track {
+  flex: 1;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.task-progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8rpx;
+}
+
+.task-progress-pct {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  min-width: 56rpx;
+  text-align: right;
+}
+
+/* 卡片底部 */
+.task-card-footer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 8rpx;
 }
 
-.timer-controls {
-  margin-top: 32rpx;
+.task-actions-left {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
 }
 
-.timer-controls button {
-  height: 80rpx;
-  line-height: 80rpx;
+.action-btn {
+  padding: 10rpx 24rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border: 2rpx solid rgba(255, 255, 255, 0.48);
 }
 
-.timer-info {
+/* "开始"按钮 */
+.start-btn {
+  padding: 14rpx 44rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--lavender-dark);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* ─────────────────────────────────
+   内联添加/编辑任务弹窗
+───────────────────────────────── */
+.task-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 24rpx;
+}
+
+.task-modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.task-modal-content {
+  position: relative;
+  width: 85%;
+  max-width: 600rpx;
+  max-height: 75vh;
+  background: #fff;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.2);
+  animation: task-modal-fade-in 0.3s ease;
+}
+
+@keyframes task-modal-fade-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.task-modal-header {
+  padding: 32rpx 32rpx 16rpx;
+  border-bottom: 1rpx solid #eee;
+  flex-shrink: 0;
+}
+
+.task-modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.task-modal-body {
+  flex: 1;
+  padding: 32rpx;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
+
+.task-modal-footer {
+  display: flex;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid #eee;
+  flex-shrink: 0;
+  gap: 16rpx;
+}
+
+.task-modal-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 12rpx;
   font-size: 28rpx;
-}
-
-.task-section {
-  margin-top: 32rpx;
-}
-
-.task-header {
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 32rpx;
-  margin-bottom: 24rpx;
-}
-
-.task-item {
-  margin-bottom: 24rpx;
-}
-
-.task-content {
-  margin-bottom: 24rpx;
-}
-
-.task-title {
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.tag {
-  padding: 4rpx 12rpx;
-  border-radius: 20rpx;
-  font-size: 20rpx;
-  color: white;
-}
-
-.tag.high {
-  background-color: var(--danger-color);
-}
-
-.tag.medium {
-  background-color: var(--warning-color);
-}
-
-.tag.low {
-  background-color: var(--info-color);
-}
-
-.task-desc {
-  font-size: 26rpx;
-  color: var(--text-secondary);
-  margin-bottom: 16rpx;
-  line-height: 1.5;
-}
-
-.task-meta {
-  font-size: 24rpx;
-  color: var(--text-light);
-  margin-bottom: 16rpx;
-}
-
-.task-progress {
-  margin-top: 16rpx;
-}
-
-.task-actions {
-  justify-content: flex-end;
-  margin-top: 16rpx;
-}
-
-.task-actions button {
-  height: 60rpx;
-  line-height: 60rpx;
-}
-
-.empty-tips {
   text-align: center;
-  padding: 48rpx;
-  color: var(--text-light);
+  font-weight: 600;
 }
 
-/* 表单样式 */
-.form-item {
-  margin-bottom: 32rpx;
+.task-modal-btn-cancel {
+  background: #f5f5f5;
+  color: #666;
 }
+
+.task-modal-btn-confirm {
+  background: #9C7BC8;
+  color: #fff;
+}
+
+/* 输入框样式 */
+.input {
+  border: 1rpx solid #ddd;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: #333;
+  background: #fafafa;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────
+   添加/编辑任务弹窗表单（表单布局）
+───────────────────────────────── */
+.form-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20rpx;
+}
+
+.form-item { margin-bottom: 28rpx; }
+
+.form-item-half { flex: 1; }
 
 .label {
   display: block;
-  margin-bottom: 8rpx;
-  font-weight: bold;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10rpx;
 }
 
 .picker {
-  border: 1rpx solid var(--border-color);
-  border-radius: 8rpx;
-  padding: 24rpx;
+  border: 1rpx solid #DDD;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
   font-size: 28rpx;
+  color: #444;
+  background: #FAFAFA;
 }
 
-/* 单选组样式 */
+/* 中断原因 */
+.interrupt-hint {
+  font-size: 28rpx;
+  color: #555;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
 .radio-item {
   display: flex;
   align-items: center;
-  margin: 24rpx 0;
+  margin: 20rpx 0;
+  font-size: 28rpx;
+  color: #444;
 }
 
-.radio-item text {
-  margin-left: 16rpx;
+.radio-item text { margin-left: 12rpx; }
+
+/* ═══════════════════════════════════════
+   番茄钟计时视图
+═══════════════════════════════════════ */
+.timer-view {
+  min-height: 100vh;
+  background-color: #F0EDF8;   /* 低饱和度薰衣草背景 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 80rpx;
+}
+
+/* ── 顶部励志语录 ── */
+.quote-section {
+  width: 100%;
+  padding: 0 60rpx 40rpx;
+  text-align: center;
+}
+
+.quote-text {
+  font-size: 28rpx;
+  color: #8B7BAE;
+  line-height: 1.8;
+  font-style: italic;
+  letter-spacing: 1rpx;
+}
+
+/* ── 圆形倒计时 ── */
+.circle-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 外环（conic-gradient 进度弧）旋转 -90° 使进度从顶部开始 */
+.circle-outer {
+  width: 560rpx;
+  height: 560rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-90deg);
+  box-shadow: 0 8rpx 40rpx rgba(124, 92, 180, 0.2);
+}
+
+/* 内圆（覆盖形成圆环 donut 效果）反向旋转还原文字方向 */
+.circle-inner {
+  width: 448rpx;
+  height: 448rpx;
+  border-radius: 50%;
+  background: #F0EDF8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(90deg);
+  gap: 8rpx;
+}
+
+.timer-digits {
+  font-size: 88rpx;
+  font-weight: 200;
+  color: #5A4A7A;
+  letter-spacing: 4rpx;
+  line-height: 1;
+}
+
+.timer-task-name {
+  font-size: 26rpx;
+  color: #9C7BC8;
+  font-weight: 500;
+  max-width: 360rpx;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer-state-label {
+  font-size: 22rpx;
+  color: #B0A0C8;
+}
+
+/* ── 底部控制按钮 ── */
+.timer-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28rpx;
+  padding-top: 20rpx;
+}
+
+/* 主按钮：暂停 / 继续 / 开始 */
+.ctrl-main-btn {
+  width: 320rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  background: var(--lavender-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 24rpx rgba(124, 92, 180, 0.35);
+}
+
+.ctrl-main-btn:active { opacity: 0.85; transform: scale(0.97); }
+
+.ctrl-resume-btn { background: #6BAF8A; }  /* 继续用绿色区分 */
+
+.ctrl-main-text {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 4rpx;
+}
+
+/* 结束按钮 */
+.ctrl-stop-btn {
+  padding: 16rpx 56rpx;
+  border-radius: 40rpx;
+  border: 2rpx solid #C0B0D8;
+  background: transparent;
+}
+
+.ctrl-stop-text {
+  font-size: 28rpx;
+  color: #9A8AB8;
+  letter-spacing: 2rpx;
 }

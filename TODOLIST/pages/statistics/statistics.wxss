@@ -1,4 +1,4 @@
-/* pages/statistics/statistics.wxss */
+/* pages/statistics/statistics.wxss — 熏衣草主题 */
 .page {
   padding-bottom: 32rpx;
 }
@@ -13,7 +13,9 @@
   align-items: center;
   padding: 24rpx;
   border: 1rpx solid var(--border-color);
-  border-radius: 8rpx;
+  border-radius: 12rpx;
+  color: var(--lavender-dark);
+  font-size: 28rpx;
 }
 
 .picker .icon {
@@ -28,6 +30,7 @@
 .chart-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 24rpx;
 }
 
@@ -47,6 +50,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -82,8 +86,9 @@
 }
 
 .badge-icon.unlocked {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--lavender-light) 0%, var(--lavender-mid) 100%);
   color: white;
+  box-shadow: 0 4rpx 12rpx rgba(156, 123, 200, 0.3);
 }
 
 .badge-icon.locked {
@@ -105,6 +110,7 @@
 .badge-name {
   font-size: 24rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   margin-bottom: 4rpx;
 }
 
@@ -133,7 +139,7 @@
 .stat-value {
   font-size: 48rpx;
   font-weight: bold;
-  color: var(--primary-color);
+  color: var(--lavender-mid);
 }
 
 .stat-label {

@@ -1,4 +1,4 @@
-/* pages/ai-planning/ai-planning.wxss */
+/* pages/ai-planning/ai-planning.wxss — 熏衣草主题 */
 .page {
   padding-bottom: 32rpx;
 }
@@ -17,6 +17,7 @@
 .control-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
 }
 
 .control-body {
@@ -37,9 +38,10 @@
 .ai-disabled {
   padding: 32rpx;
   text-align: center;
-  color: var(--warning-color);
-  background-color: rgba(255, 195, 0, 0.1);
-  border-radius: 8rpx;
+  color: var(--lavender-mid);
+  background-color: var(--lavender-pale);
+  border-radius: 12rpx;
+  font-size: 26rpx;
 }
 
 /* 四象限网格 */
@@ -57,26 +59,27 @@
 
 .quadrant {
   background-color: var(--card-bg);
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   padding: 24rpx;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--card-shadow);
 }
 
 .quadrant-1 {
-  border-top: 8rpx solid var(--danger-color);
+  border-top: 8rpx solid var(--lavender-dark);
 }
 
 .quadrant-2 {
-  border-top: 8rpx solid var(--primary-color);
+  border-top: 8rpx solid var(--lavender-mid);
 }
 
 .quadrant-3 {
-  border-top: 8rpx solid var(--warning-color);
+  border-top: 8rpx solid var(--lavender-light);
 }
 
 .quadrant-4 {
-  border-top: 8rpx solid var(--text-light);
+  border-top: 8rpx solid var(--lavender-pale);
 }
 
 .quadrant-header {
@@ -86,6 +89,7 @@
 .quadrant-title {
   font-size: 28rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -105,15 +109,15 @@
   height: 120rpx;
   position: absolute;
   background-color: white;
-  border-radius: 8rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(124, 92, 180, 0.12);
   padding: 16rpx;
   z-index: 1;
 }
 
 .task-item.dragging {
   z-index: 100;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8rpx 24rpx rgba(124, 92, 180, 0.25);
 }
 
 .task-content {
@@ -125,6 +129,7 @@
 .task-title {
   font-size: 24rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -145,13 +150,13 @@
 }
 
 .tag.urgency {
-  background-color: rgba(250, 81, 81, 0.1);
-  color: var(--danger-color);
+  background-color: rgba(124, 92, 180, 0.1);
+  color: var(--lavender-dark);
 }
 
 .tag.importance {
-  background-color: rgba(26, 173, 25, 0.1);
-  color: var(--primary-color);
+  background-color: rgba(156, 123, 200, 0.1);
+  color: var(--lavender-mid);
 }
 
 /* 任务拆解 */
@@ -166,6 +171,7 @@
 .breakdown-title {
   font-size: 32rpx;
   font-weight: bold;
+  color: var(--lavender-dark);
   display: block;
 }
 
@@ -195,13 +201,14 @@
 .step-index {
   font-size: 24rpx;
   font-weight: bold;
-  color: var(--primary-color);
+  color: var(--lavender-mid);
   min-width: 120rpx;
 }
 
 .step-content {
   font-size: 28rpx;
   line-height: 1.5;
+  color: var(--text-primary);
   flex: 1;
 }
 
