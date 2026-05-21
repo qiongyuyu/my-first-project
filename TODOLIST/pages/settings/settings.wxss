@@ -162,12 +162,29 @@
   color: var(--text-light);
 }
 
-/* 操作按钮 */
+/* ── 底部操作 ── */
+
 .action-section {
-  padding: 32rpx;
+  padding: 48rpx 32rpx 64rpx;
+  display: flex; flex-direction: column; align-items: center; gap: 28rpx;
 }
 
-.action-section button {
-  height: 80rpx;
-  line-height: 80rpx;
+.save-btn {
+  width: 100%; height: 88rpx; border-radius: 16rpx;
+  background: var(--lavender-mid); color: #fff;
+  font-size: 30rpx; font-weight: 600; border: none;
+}
+
+.save-btn::after { border: none; }
+
+.save-btn:active { opacity: 0.85; }
+
+.save-btn[disabled] { opacity: 0.6; }
+
+.logout-link {
+  padding: 12rpx 0;
+}
+
+.logout-link text {
+  font-size: 26rpx; color: #C0B0D8;
 }

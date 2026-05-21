@@ -8,6 +8,15 @@ App({
         offlineQueue: [], // 离线操作队列
     },
     onLaunch() {
+        // 恢复登录状态
+        var token = wx.getStorageSync('token');
+        if (token) {
+            this.globalData.token = token;
+        }
+        var userInfo = wx.getStorageSync('userInfo');
+        if (userInfo) {
+            this.globalData.userInfo = userInfo;
+        }
         // 初始化网络状态监听
         this.initNetworkListener();
         // 初始化本地存储

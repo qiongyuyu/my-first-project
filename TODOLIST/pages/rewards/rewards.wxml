@@ -49,15 +49,19 @@
           <text class="cost-unit">积分</text>
         </view>
         <text class="gacha-name">十连抽</text>
-        <text class="gacha-desc">必得稀有道具</text>
+        <text class="gacha-desc">必得稀有以上</text>
       </view>
     </view>
-    <view class="gacha-history">
+    <!-- 最近获得 -->
+    <view class="gacha-history" wx:if="{{recentItems.length > 0}}">
       <text class="history-title">最近获得</text>
       <scroll-view class="history-list" scroll-x>
-        <view wx:for="{{recentItems}}" wx:key="id" class="history-item">
-          <image class="item-icon" src="{{item.icon}}" mode="aspectFit"></image>
-          <text class="item-name">{{item.name}}</text>
+        <view wx:for="{{recentItems}}" wx:key="itemId" class="history-item">
+          <view class="history-icon-wrap {{item.rarity}}">
+            <image wx:if="{{item.iconUrl}}" class="history-icon" src="{{item.iconUrl}}" mode="aspectFit"></image>
+            <text wx:else class="history-icon-placeholder">{{item.name.charAt(0)}}</text>
+          </view>
+          <text class="history-name">{{item.name}}</text>
         </view>
       </scroll-view>
     </view>
@@ -73,13 +77,14 @@
       <text>背包空空如也，快去抽卡吧！</text>
     </view>
     <view wx:else class="inventory-grid">
-      <view wx:for="{{inventory}}" wx:key="id" class="inventory-item" data-index="{{index}}" bindtap="useItem">
-        <view class="item-icon-container">
-          <image class="item-icon" src="{{item.icon}}" mode="aspectFit"></image>
+      <view wx:for="{{inventory}}" wx:key="itemId" class="inventory-item" data-index="{{index}}" bindtap="useItem">
+        <view class="item-icon-container {{item.rarity}}">
+          <image wx:if="{{item.iconUrl}}" class="item-icon" src="{{item.iconUrl}}" mode="aspectFit"></image>
+          <text wx:else class="item-icon-text">{{item.name.charAt(0)}}</text>
           <text wx:if="{{item.count > 1}}" class="item-count">x{{item.count}}</text>
         </view>
         <text class="item-name">{{item.name}}</text>
-        <text class="item-rarity {{item.rarity}}">{{item.rarityText}}</text>
+        <text class="item-rarity {{item.rarity}}">{{item.rarity}}</text>
       </view>
     </view>
   </view>
@@ -88,64 +93,177 @@
   <view class="custom-rewards-section card">
     <view class="section-header">
       <text class="section-title">自定义奖励</text>
-      <button class="btn btn-secondary" size="mini" bindtap="showRewardModal">+ 新增</button>
+      <button class="btn btn-secondary" size="mini" bindtap="showRewardEditor">+ 新增</button>
     </view>
     <view wx:if="{{customRewards.length === 0}}" class="empty-rewards">
-      <text>暂无自定义奖励，点击上方按钮创建</text>
+      <text class="empty-icon">🎯</text>
+      <text>设定目标，给自己一个奖励吧</text>
     </view>
     <view wx:else class="rewards-list">
-      <view wx:for="{{customRewards}}" wx:key="id" class="reward-item">
-        <view class="reward-content">
-          <view class="reward-header">
-            <text class="reward-title">{{item.title}}</text>
-            <text class="reward-status {{item.completed ? 'completed' : 'pending'}}">
-              {{item.completed ? '已领取' : '待完成'}}
+      <view wx:for="{{customRewards}}" wx:key="rewardId" class="reward-card {{item.isCompleted ? 'completed' : ''}}">
+        <!-- 左侧图标 -->
+        <view class="reward-icon-col">
+          <text class="reward-type-icon">{{item.conditionType === 'focus' ? '⏱' : item.conditionType === 'tasks' ? '✅' : item.conditionType === 'streak' ? '🔥' : '⭐'}}</text>
+        </view>
+        <!-- 中间内容 -->
+        <view class="reward-body">
+          <view class="reward-top-row">
+            <text class="reward-card-title">{{item.title}}</text>
+            <text class="reward-card-status {{item.isCompleted ? 'done' : 'pending'}}">
+              {{item.isCompleted ? '已达成' : '进行中'}}
             </text>
           </view>
-          <text class="reward-condition">条件: {{item.condition}}</text>
-          <text class="reward-description">{{item.description}}</text>
+          <text class="reward-card-condition">{{item.conditionLabel}}</text>
+          <!-- 进度条 -->
+          <view wx:if="{{!item.isCompleted}}" class="reward-progress-wrap">
+            <view class="reward-progress-track">
+              <view class="reward-progress-fill" style="width: {{item.progressPct}}%;"></view>
+            </view>
+            <text class="reward-progress-text">{{item.currentProgress}}/{{item.conditionValue}}</text>
+          </view>
+          <text wx:if="{{item.isCompleted && item.completedAt}}" class="reward-completed-at">
+            达成于 {{item.completedAt.slice(0, 10)}}
+          </text>
         </view>
-        <button class="btn btn-primary" size="mini" disabled="{{item.completed}}" bindtap="claimReward" data-id="{{item.id}}">领取</button>
+        <!-- 右侧操作 -->
+        <view class="reward-actions-col">
+          <view wx:if="{{!item.isCompleted}}" class="reward-action-btns">
+            <view class="reward-claim-btn {{item.progressPct >= 100 ? 'ready' : ''}}" bindtap="claimReward" data-id="{{item.rewardId}}">
+              <text>{{item.progressPct >= 100 ? '领取' : '加油'}}</text>
+            </view>
+          </view>
+          <view class="reward-edit-btns">
+            <text class="reward-edit-icon" bindtap="editReward" data-id="{{item.rewardId}}">✎</text>
+            <text class="reward-delete-icon" bindtap="deleteReward" data-id="{{item.rewardId}}">✕</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 抽卡结果模态框 -->
-  <modal title="抽卡结果" visible="{{gachaResultVisible}}" bindcancel="hideGachaResult" bindconfirm="hideGachaResult">
-    <view slot="content" class="gacha-result">
-      <view wx:if="{{gachaResult}}" class="result-item">
-        <image class="result-icon" src="{{gachaResult.icon}}" mode="aspectFit"></image>
-        <text class="result-name">{{gachaResult.name}}</text>
-        <text class="result-rarity {{gachaResult.rarity}}">{{gachaResult.rarityText}}</text>
-        <text class="result-desc">{{gachaResult.description}}</text>
+  <!-- ═══════════════════════════════════════
+    抽卡结果弹窗（全屏遮罩 + 稀有度特效）
+  ═══════════════════════════════════════ -->
+  <view class="gacha-overlay {{gachaResultVisible ? 'show' : ''}}" catchtouchmove="preventTouchMove">
+    <!-- 单抽结果 -->
+    <view wx:if="{{gachaResults.length === 1}}" class="gacha-single-card {{gachaResults[0].rarity}}">
+      <!-- 稀有度光效背景 -->
+      <view class="gacha-glow {{gachaResults[0].rarity}}"></view>
+      <view class="gacha-rarity-tag {{gachaResults[0].rarity}}">
+        <text>{{gachaResults[0].rarity}}</text>
       </view>
-      <view wx:else class="result-loading">
-        <text>正在抽卡中...</text>
+      <view class="gacha-item-icon-wrap {{gachaResults[0].rarity}}">
+        <image wx:if="{{gachaResults[0].iconUrl}}" class="gacha-item-icon" src="{{gachaResults[0].iconUrl}}" mode="aspectFit"></image>
+        <text wx:else class="gacha-item-emoji">{{gachaResults[0].rarity === 'legendary' ? '👑' : gachaResults[0].rarity === 'epic' ? '💎' : gachaResults[0].rarity === 'rare' ? '🔮' : '🎁'}}</text>
+      </view>
+      <text class="gacha-item-name {{gachaResults[0].rarity}}">{{gachaResults[0].name}}</text>
+      <text class="gacha-item-desc">{{gachaResults[0].description}}</text>
+      <view class="gacha-points-info">
+        <text class="gacha-points-label">剩余积分</text>
+        <text class="gacha-points-value">{{gachaRemainingPoints}}</text>
+      </view>
+      <button class="gacha-confirm-btn" bindtap="hideGachaResult">确认</button>
+    </view>
+
+    <!-- 十连抽结果（网格展示） -->
+    <view wx:else class="gacha-multi-card">
+      <view class="gacha-multi-header">
+        <text class="gacha-multi-title">十连抽结果</text>
+      </view>
+      <scroll-view class="gacha-multi-scroll" scroll-y>
+        <view class="gacha-multi-grid">
+          <view wx:for="{{gachaResults}}" wx:key="itemId"
+                class="gacha-multi-item {{item.rarity}} {{item.isMain ? 'is-main' : ''}}"
+                style="animation-delay: {{index * 0.08}}s;">
+            <view class="gacha-multi-icon-wrap {{item.rarity}}">
+              <image wx:if="{{item.iconUrl}}" class="gacha-multi-icon" src="{{item.iconUrl}}" mode="aspectFit"></image>
+              <text wx:else class="gacha-multi-emoji">{{item.rarity === 'legendary' ? '👑' : item.rarity === 'epic' ? '💎' : item.rarity === 'rare' ? '🔮' : '⭐'}}</text>
+            </view>
+            <text class="gacha-multi-name">{{item.name}}</text>
+            <text class="gacha-multi-rarity {{item.rarity}}">{{item.rarity}}</text>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="gacha-multi-footer">
+        <text class="gacha-points-label">剩余积分: {{gachaRemainingPoints}}</text>
+        <button class="gacha-confirm-btn" bindtap="hideGachaResult">确认</button>
       </view>
     </view>
-  </modal>
+  </view>
 
-  <!-- 新增自定义奖励模态框 -->
-  <modal title="新增自定义奖励" visible="{{rewardModalVisible}}" bindcancel="hideRewardModal" bindconfirm="saveReward">
-    <form slot="content">
-      <view class="form-item">
-        <text class="label">奖励标题</text>
-        <input class="input" value="{{rewardForm.title}}" placeholder="例如：奖励自己一杯奶茶" bindinput="onRewardTitleInput" />
+  <!-- 抽卡中 loading -->
+  <view class="gacha-overlay {{gachaLoading ? 'show' : ''}}">
+    <view class="gacha-loading-box">
+      <view class="gacha-loading-spinner"></view>
+      <text class="gacha-loading-text">正在抽取中...</text>
+    </view>
+  </view>
+
+  <!-- ═══════════════════════════════════════
+    自定义奖励编辑器（底部弹出面板）
+  ═══════════════════════════════════════ -->
+  <view class="reward-editor-overlay {{rewardEditorVisible ? 'show' : ''}}" catchtouchmove="preventTouchMove">
+    <view class="reward-editor-mask" bindtap="hideRewardEditor"></view>
+    <view class="reward-editor-panel {{rewardEditorVisible ? 'slide-up' : ''}}">
+      <!-- 拖拽指示条 -->
+      <view class="editor-handle"></view>
+
+      <view class="editor-header">
+        <text class="editor-title">{{rewardEditorMode === 'edit' ? '编辑奖励' : '新增奖励'}}</text>
+        <text class="editor-close" bindtap="hideRewardEditor">✕</text>
       </view>
-      <view class="form-item">
-        <text class="label">触发条件</text>
-        <picker mode="selector" range="{{conditionOptions}}" value="{{rewardForm.conditionIndex}}" bindchange="onConditionChange">
-          <view class="picker">{{conditionOptions[rewardForm.conditionIndex]}}</view>
-        </picker>
+
+      <scroll-view class="editor-body" scroll-y>
+        <!-- 奖励标题 -->
+        <view class="editor-field">
+          <text class="editor-label">奖励名称</text>
+          <input class="editor-input" value="{{rewardForm.title}}"
+                 placeholder="例如：奖励自己一杯奶茶" maxlength="20"
+                 bindinput="onRewardTitleInput" />
+        </view>
+
+        <!-- 条件类型 -->
+        <view class="editor-field">
+          <text class="editor-label">达成条件</text>
+          <picker mode="selector" range="{{conditionTypeOptions}}" range-key="label"
+                  value="{{conditionTypeIndex}}" bindchange="onConditionTypeChange">
+            <view class="editor-picker">
+              <text class="picker-icon">{{conditionTypeOptions[conditionTypeIndex].icon}}</text>
+              <text>{{conditionTypeOptions[conditionTypeIndex].label}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 目标值 -->
+        <view class="editor-field">
+          <text class="editor-label">目标值</text>
+          <view class="editor-value-row">
+            <input class="editor-input editor-input-num" type="number"
+                   value="{{rewardForm.conditionValue}}" placeholder="输入目标数值"
+                   bindinput="onRewardValueInput" />
+            <text class="editor-value-unit">
+              {{conditionTypeOptions[conditionTypeIndex].value === 'focus' ? '小时' : conditionTypeOptions[conditionTypeIndex].value === 'streak' ? '天' : '个'}}
+            </text>
+          </view>
+        </view>
+
+        <!-- 描述 -->
+        <view class="editor-field">
+          <text class="editor-label">描述（可选）</text>
+          <textarea class="editor-textarea" value="{{rewardForm.description}}"
+                    placeholder="描述这个奖励的意义，给自己更多动力"
+                    maxlength="100" bindinput="onRewardDescInput" />
+        </view>
+      </scroll-view>
+
+      <!-- 底部按钮 -->
+      <view class="editor-footer">
+        <button class="editor-btn editor-btn-cancel" bindtap="hideRewardEditor">取消</button>
+        <button class="editor-btn editor-btn-save" bindtap="saveReward" loading="{{rewardSaving}}">
+          {{rewardEditorMode === 'edit' ? '保存修改' : '创建奖励'}}
+        </button>
       </view>
-      <view class="form-item">
-        <text class="label">条件参数</text>
-        <input class="input" type="number" value="{{rewardForm.conditionValue}}" placeholder="例如：10" bindinput="onConditionValueInput" />
-      </view>
-      <view class="form-item">
-        <text class="label">奖励描述</text>
-        <textarea class="input" value="{{rewardForm.description}}" placeholder="描述奖励内容和意义" bindinput="onRewardDescInput" />
-      </view>
-    </form>
-  </modal>
+    </view>
+  </view>
 </view>

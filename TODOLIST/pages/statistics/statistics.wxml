@@ -14,7 +14,7 @@
   <view class="chart-section card">
     <view class="chart-title">专注时长统计</view>
     <view class="chart-container">
-      <ec-canvas id="duration-chart" canvas-id="duration-chart" ec="{{ecDuration}}"></ec-canvas>
+      <canvas type="2d" id="duration-canvas" class="chart-canvas"></canvas>
     </view>
   </view>
 
@@ -22,7 +22,7 @@
   <view class="chart-section card">
     <view class="chart-title">任务类别分布</view>
     <view class="chart-container">
-      <ec-canvas id="category-chart" canvas-id="category-chart" ec="{{ecCategory}}"></ec-canvas>
+      <canvas type="2d" id="category-canvas" class="chart-canvas"></canvas>
     </view>
   </view>
 

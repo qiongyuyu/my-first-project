@@ -22,5 +22,7 @@ public class BusinessException extends RuntimeException {
     public static final int PASSWORD_ERROR = 1002;
     public static final int TOKEN_EXPIRED = 1003;
     public static final int TASK_NOT_FOUND = 2001;
+    public static final int USER_ALREADY_EXISTS = 1005;
+    public static final int PASSWORD_NOT_SET = 1006;
     public static final int AI_SERVICE_UNAVAILABLE = 3001;
 }

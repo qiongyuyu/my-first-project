@@ -23,6 +23,7 @@ public class FocusTimeResponse {
     @AllArgsConstructor
     public static class FocusData {
         private String date;
+        private String label;
         private long duration;
         private int pomoCount;
     }

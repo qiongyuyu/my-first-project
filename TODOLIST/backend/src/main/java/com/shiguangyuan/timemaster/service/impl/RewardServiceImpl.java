@@ -35,6 +35,7 @@ public class RewardServiceImpl implements RewardService {
     private final Random random = new Random();
 
     @Override
+    @Transactional(readOnly = true)
     public UserStatsResponse getUserStats(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("用户", userId));
@@ -137,6 +138,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public InventoryResponse getInventory(String userId) {
         List<UserInventory> inventories = inventoryRepository.findByUserUserId(userId);
         List<InventoryResponse.InventoryItem> items = inventories.stream().map(inv -> {
@@ -176,6 +178,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CustomReward> getCustomRewards(String userId) {
         return customRewardRepository.findByUserUserId(userId);
     }
@@ -186,13 +189,23 @@ public class RewardServiceImpl implements RewardService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("用户", userId));
 
+        Map<String, Object> conditionValue;
+        if (request.getConditionValue() instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) request.getConditionValue();
+            conditionValue = map;
+        } else {
+            conditionValue = new LinkedHashMap<>();
+            conditionValue.put("value", request.getConditionValue());
+        }
+
         CustomReward reward = CustomReward.builder()
                 .rewardId(idGenerator.generateId())
                 .user(user)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .conditionType(request.getConditionType())
-                .conditionValue(request.getConditionValue())
+                .conditionValue(conditionValue)
                 .isCompleted(false)
                 .build();
 
@@ -212,7 +225,17 @@ public class RewardServiceImpl implements RewardService {
         if (request.getTitle() != null) reward.setTitle(request.getTitle());
         if (request.getDescription() != null) reward.setDescription(request.getDescription());
         if (request.getConditionType() != null) reward.setConditionType(request.getConditionType());
-        if (request.getConditionValue() != null) reward.setConditionValue(request.getConditionValue());
+        if (request.getConditionValue() != null) {
+            if (request.getConditionValue() instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = (Map<String, Object>) request.getConditionValue();
+                reward.setConditionValue(map);
+            } else {
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("value", request.getConditionValue());
+                reward.setConditionValue(map);
+            }
+        }
 
         return customRewardRepository.save(reward);
     }

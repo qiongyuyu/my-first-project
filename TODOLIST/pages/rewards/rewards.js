@@ -1,438 +1,410 @@
 "use strict";
 // pages/rewards/rewards.ts
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var api_1 = require("../../utils/api");
 Page({
-    /**
-     * 页面的初始数据
-     */
     data: {
-        // 用户信息
-        userInfo: {
-            nickName: '',
-            avatarUrl: ''
-        },
-        userLevel: 5,
-        points: 1500,
-        experience: 320,
-        nextLevelExp: 500,
-        levelProgress: 64,
-        totalRewards: 12,
-        // 抽卡系统
+        userInfo: { nickName: '', avatarUrl: '' },
+        userLevel: 1,
+        points: 0,
+        experience: 0,
+        nextLevelExp: 100,
+        levelProgress: 0,
+        totalRewards: 0,
         recentItems: [],
         gachaResultVisible: false,
-        gachaResult: null,
-        // 背包/道具
+        gachaResults: [],
+        gachaLoading: false,
+        gachaCost: 0,
+        gachaRemainingPoints: 0,
         inventory: [],
-        // 自定义奖励
+        inventoryLoading: false,
         customRewards: [],
-        rewardModalVisible: false,
+        rewardEditorVisible: false,
+        rewardEditorMode: 'create',
+        rewardEditingId: '',
+        rewardSaving: false,
         rewardForm: {
-            id: '',
             title: '',
-            conditionIndex: 0,
+            conditionType: 'focus',
             conditionValue: '',
-            description: ''
+            description: '',
         },
-        conditionOptions: ['专注时长达到', '完成任务数达到', '连续打卡天数', '积分达到'],
-        // 模态框相关
-        modalVisible: false
+        conditionTypeOptions: [
+            { value: 'focus', label: '专注时长达到 (小时)', icon: '⏱' },
+            { value: 'tasks', label: '完成任务数达到', icon: '✅' },
+            { value: 'streak', label: '连续打卡天数', icon: '🔥' },
+            { value: 'points', label: '积分达到', icon: '⭐' },
+        ],
+        conditionTypeIndex: 0,
+        pageLoading: true,
     },
-    /**
-     * 生命周期函数--监听页面加载
-     */
-    onLoad() {
+    onLoad: function () {
         this.loadUserInfo();
-        this.loadInventory();
+        this.loadAllData();
+    },
+    onShow: function () {
+        this.loadAllData();
+    },
+    loadAllData: function () {
+        var _this = this;
+        this.setData({ pageLoading: true });
+        Promise.all([
+            api_1.api.getUserStats(),
+            api_1.api.getInventory(),
+        ]).then(function (results) {
+            var userStats = results[0];
+            var inventory = results[1];
+            _this.setData({
+                points: userStats.points,
+                experience: userStats.experience,
+                userLevel: userStats.level,
+                nextLevelExp: userStats.nextLevelExp,
+                levelProgress: userStats.levelProgress,
+                totalRewards: userStats.totalRewards,
+                inventory: inventory.items || [],
+                pageLoading: false,
+            });
+            wx.setStorageSync('inventory', inventory.items || []);
+        }).catch(function () {
+            _this.loadFromLocalFallback();
+            _this.setData({ pageLoading: false });
+        });
         this.loadCustomRewards();
-        this.loadRecentItems();
     },
-    /**
-     * 生命周期函数--监听页面显示
-     */
-    onShow() {
-        this.updateUserStats();
-    },
-    /**
-     * 加载用户信息
-     */
-    loadUserInfo() {
-        const userInfo = wx.getStorageSync('userInfo');
-        if (userInfo) {
-            this.setData({ userInfo });
-        }
-    },
-    /**
-     * 更新用户统计数据
-     */
-    updateUserStats() {
-        // 从本地存储计算统计数据
-        const records = wx.getStorageSync('pomodoroRecords') || [];
-        // const tasks = wx.getStorageSync('tasks') || []; // 未使用
-        const rewards = wx.getStorageSync('rewards') || [];
-        // 模拟计算
-        const totalFocusSeconds = records.reduce((sum, r) => sum + (r.duration || 0), 0);
-        const totalFocusHours = Math.floor(totalFocusSeconds / 3600);
-        // 经验值基于专注时长
-        const experience = totalFocusHours * 10;
-        const userLevel = Math.floor(experience / 100) + 1;
-        const nextLevelExp = userLevel * 100;
-        const levelProgress = ((experience % 100) / 100) * 100;
+    loadFromLocalFallback: function () {
+        var records = wx.getStorageSync('pomodoroRecords') || [];
+        var inventory = wx.getStorageSync('inventory') || [];
+        var totalSeconds = records.reduce(function (s, r) { return s + (r.duration || 0); }, 0);
+        var exp = Math.floor(totalSeconds / 3600) * 10;
+        var lv = Math.floor(exp / 100) + 1;
         this.setData({
-            experience,
-            userLevel,
-            nextLevelExp,
-            levelProgress,
-            totalRewards: rewards.length
+            experience: exp,
+            userLevel: lv,
+            nextLevelExp: lv * 100,
+            levelProgress: Math.min(((exp % 100) / 100) * 100, 100),
+            totalRewards: inventory.length,
+            inventory: inventory,
         });
     },
-    /**
-     * 加载背包道具
-     */
-    loadInventory() {
-        // 模拟数据
-        const inventory = [
-            {
-                id: '1',
-                name: '专注药剂',
-                icon: '/images/items/potion.png',
-                rarity: 'common',
-                rarityText: '普通',
-                count: 3,
-                description: '使用后下次专注时间+5分钟'
-            },
-            {
-                id: '2',
-                name: '时间沙漏',
-                icon: '/images/items/hourglass.png',
-                rarity: 'rare',
-                rarityText: '稀有',
-                count: 1,
-                description: '暂停时间，获得额外休息时间'
-            },
-            {
-                id: '3',
-                name: '星辰主题',
-                icon: '/images/items/theme.png',
-                rarity: 'epic',
-                rarityText: '史诗',
-                count: 1,
-                description: '解锁星空主题界面'
-            },
-            {
-                id: '4',
-                name: 'AI规划助手',
-                icon: '/images/items/ai.png',
-                rarity: 'legendary',
-                rarityText: '传奇',
-                count: 1,
-                description: 'AI规划准确度提升20%'
-            }
-        ];
-        this.setData({ inventory });
+    loadUserInfo: function () {
+        var userInfo = wx.getStorageSync('userInfo');
+        if (userInfo)
+            this.setData({ userInfo: userInfo });
     },
-    /**
-     * 加载最近获得的道具
-     */
-    loadRecentItems() {
-        const recentItems = [
-            {
-                id: '1',
-                name: '专注药剂',
-                icon: '/images/items/potion.png'
-            },
-            {
-                id: '2',
-                name: '金币',
-                icon: '/images/items/coin.png'
-            },
-            {
-                id: '3',
-                name: '经验书',
-                icon: '/images/items/book.png'
-            }
-        ];
-        this.setData({ recentItems });
-    },
-    /**
-     * 加载自定义奖励
-     */
-    loadCustomRewards() {
-        const customRewards = [
-            {
-                id: '1',
-                title: '一杯奶茶',
-                condition: '专注时长达到5小时',
-                description: '奖励自己一杯最喜欢的奶茶',
-                completed: false,
-                conditionType: 'focus',
-                conditionValue: 5
-            },
-            {
-                id: '2',
-                title: '看一场电影',
-                condition: '完成10个任务',
-                description: '周末去看一场期待已久的电影',
-                completed: true,
-                conditionType: 'tasks',
-                conditionValue: 10
-            },
-            {
-                id: '3',
-                title: '买一本新书',
-                condition: '连续打卡7天',
-                description: '购买一本感兴趣的新书',
-                completed: false,
-                conditionType: 'streak',
-                conditionValue: 7
-            }
-        ];
-        this.setData({ customRewards });
-    },
-    /**
-     * 抽卡
-     */
-    drawGacha(e) {
-        const type = e.currentTarget.dataset.type;
-        const cost = type === 'single' ? 100 : 900;
+    // ─── 抽卡 ───
+    drawGacha: function (e) {
+        var _this = this;
+        if (this.data.gachaLoading)
+            return;
+        var type = e.currentTarget.dataset.type;
+        var cost = type === 'multi' ? 900 : 100;
         if (this.data.points < cost) {
-            wx.showToast({
-                title: '积分不足',
-                icon: 'none'
-            });
+            wx.showToast({ title: '积分不足，去完成番茄钟赚积分吧', icon: 'none' });
             return;
         }
-        // 消耗积分
-        const newPoints = this.data.points - cost;
-        this.setData({ points: newPoints });
-        // 模拟抽卡结果
-        const items = [
-            {
-                id: '1',
-                name: '专注药剂',
-                icon: '/images/items/potion.png',
-                rarity: 'common',
-                rarityText: '普通',
-                description: '使用后下次专注时间+5分钟'
-            },
-            {
-                id: '2',
-                name: '时间沙漏',
-                icon: '/images/items/hourglass.png',
-                rarity: 'rare',
-                rarityText: '稀有',
-                description: '暂停时间，获得额外休息时间'
-            },
-            {
-                id: '3',
-                name: '星辰主题',
-                icon: '/images/items/theme.png',
-                rarity: 'epic',
-                rarityText: '史诗',
-                description: '解锁星空主题界面'
-            },
-            {
-                id: '4',
-                name: 'AI规划助手',
-                icon: '/images/items/ai.png',
-                rarity: 'legendary',
-                rarityText: '传奇',
-                description: 'AI规划准确度提升20%'
-            }
+        this.setData({ gachaLoading: true, gachaCost: cost });
+        api_1.api.drawGacha(type)
+            .then(function (res) {
+            var item = res.item;
+            var results = type === 'multi'
+                ? _this.generateMultiResults(item)
+                : [item];
+            _this.setData({
+                points: res.remainingPoints,
+                gachaResults: results,
+                gachaResultVisible: true,
+                gachaRemainingPoints: res.remainingPoints,
+                gachaLoading: false,
+            });
+            _this.updateInventoryAfterGacha(item, type);
+            _this.addToRecentItems(item);
+        })
+            .catch(function (err) {
+            _this.setData({ gachaLoading: false });
+            wx.showToast({ title: err.message || '抽卡失败', icon: 'none' });
+        });
+    },
+    generateMultiResults: function (mainItem) {
+        var results = [];
+        results.push(Object.assign(Object.assign({}, mainItem), { isMain: true }));
+        var fillerPool = [
+            { name: '经验碎片', rarity: 'common', description: '微小的经验碎片' },
+            { name: '专注药水', rarity: 'common', description: '使用后下次专注效率+10%' },
+            { name: '时间沙漏', rarity: 'rare', description: '重置每日任务冷却时间' },
+            { name: '星辰主题', rarity: 'epic', description: '解锁星空主题界面' },
         ];
-        // 根据抽卡类型决定概率
-        let result = items[0]; // 默认第一个道具
-        if (type === 'multi') {
-            // 十连抽必得稀有以上
-            const rareItems = items.filter(item => item.rarity !== 'common');
-            result = rareItems[Math.floor(Math.random() * rareItems.length)];
+        for (var i = 0; i < 9; i++) {
+            var f = fillerPool[Math.floor(Math.random() * fillerPool.length)];
+            results.push({ itemId: 'filler-' + Date.now() + '-' + i, name: f.name, rarity: f.rarity, iconUrl: '', description: f.description });
+        }
+        for (var i = results.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = results[i];
+            results[i] = results[j];
+            results[j] = tmp;
+        }
+        return results;
+    },
+    updateInventoryAfterGacha: function (item, type) {
+        var inventory = this.data.inventory.slice();
+        var existing = inventory.find(function (i) { return i.itemId === item.itemId; });
+        if (existing) {
+            existing.count += 1;
         }
         else {
-            // 单抽普通概率
-            const weights = [0.5, 0.3, 0.15, 0.05]; // 普通、稀有、史诗、传奇
-            const rand = Math.random();
-            let cumulative = 0;
-            for (let i = 0; i < weights.length; i++) {
-                cumulative += weights[i];
-                if (rand < cumulative) {
-                    result = items[i];
-                    break;
-                }
-            }
+            inventory.push({
+                itemId: item.itemId,
+                name: item.name,
+                iconUrl: item.iconUrl,
+                rarity: item.rarity,
+                count: 1,
+                description: item.description,
+            });
         }
-        // 添加到背包
-        const inventory = [...this.data.inventory];
-        const existingItem = inventory.find(item => item.id === result.id);
-        if (existingItem) {
-            existingItem.count += 1;
-        }
-        else {
-            inventory.push(Object.assign(Object.assign({}, result), { count: 1 }));
-        }
-        // 添加到最近获得
-        const recentItems = [...this.data.recentItems];
-        recentItems.unshift({
-            id: result.id,
-            name: result.name,
-            icon: result.icon
-        });
-        if (recentItems.length > 5)
-            recentItems.pop();
-        this.setData({
-            inventory,
-            recentItems,
-            gachaResult: result,
-            gachaResultVisible: true
-        });
-        // 保存到本地存储
+        this.setData({ inventory: inventory });
         wx.setStorageSync('inventory', inventory);
     },
-    /**
-     * 隐藏抽卡结果
-     */
-    hideGachaResult() {
-        this.setData({ gachaResultVisible: false });
+    addToRecentItems: function (item) {
+        var recent = this.data.recentItems.slice();
+        recent.unshift({ itemId: item.itemId, name: item.name, iconUrl: item.iconUrl, rarity: item.rarity });
+        if (recent.length > 8)
+            recent.pop();
+        this.setData({ recentItems: recent });
     },
-    /**
-     * 使用道具
-     */
-    useItem(e) {
-        const index = e.currentTarget.dataset.index;
-        const item = this.data.inventory[index];
+    hideGachaResult: function () {
+        this.setData({ gachaResultVisible: false, gachaResults: [] });
+    },
+    // ─── 背包道具 ───
+    useItem: function (e) {
+        var _this = this;
+        var idx = e.currentTarget.dataset.index;
+        var item = this.data.inventory[idx];
+        if (!item)
+            return;
         wx.showModal({
-            title: `使用 ${item.name}`,
-            content: item.description,
-            success: (res) => {
-                if (res.confirm) {
-                    // 减少道具数量
-                    const inventory = [...this.data.inventory];
+            title: '使用 ' + item.name,
+            content: item.description || '确定使用该道具吗？',
+            success: function (res) {
+                if (!res.confirm)
+                    return;
+                api_1.api.useItem(item.itemId, 1)
+                    .then(function () {
+                    var inventory = _this.data.inventory.slice();
                     if (item.count > 1) {
-                        inventory[index].count -= 1;
+                        inventory[idx].count -= 1;
                     }
                     else {
-                        inventory.splice(index, 1);
+                        inventory.splice(idx, 1);
                     }
-                    this.setData({ inventory });
+                    _this.setData({ inventory: inventory });
                     wx.setStorageSync('inventory', inventory);
-                    wx.showToast({
-                        title: `已使用 ${item.name}`,
-                        icon: 'success'
-                    });
-                }
+                    wx.showToast({ title: '已使用 ' + item.name, icon: 'success' });
+                })
+                    .catch(function (err) {
+                    wx.showToast({ title: err.message || '使用失败', icon: 'none' });
+                });
+            },
+        });
+    },
+    // ─── 自定义奖励 ───
+    loadCustomRewards: function () {
+        var _this = this;
+        api_1.api.getCustomRewards().then(function (res) {
+            var list = Array.isArray(res) ? res : (res.data || res.items || []);
+            if (list.length > 0) {
+                var enriched = list.map(function (r) { return _this.enrichReward(r); });
+                _this.setData({ customRewards: enriched });
+                wx.setStorageSync('customRewards', enriched);
+                return;
+            }
+        }).catch(function () {
+            var local = wx.getStorageSync('customRewards') || [];
+            if (local.length > 0) {
+                _this.setData({ customRewards: local });
+            } else {
+                var defaults = [
+                    { rewardId: 'default-1', title: '一杯奶茶', conditionType: 'focus', conditionValue: 5, description: '奖励自己一杯最喜欢的奶茶', isCompleted: false },
+                    { rewardId: 'default-2', title: '看一场电影', conditionType: 'tasks', conditionValue: 10, description: '周末去看一场期待已久的电影', isCompleted: false },
+                    { rewardId: 'default-3', title: '买一本新书', conditionType: 'streak', conditionValue: 7, description: '购买一本感兴趣的新书', isCompleted: false },
+                ];
+                _this.setData({ customRewards: defaults.map(function (r) { return _this.enrichReward(r); }) });
             }
         });
     },
-    /**
-     * 显示新增奖励模态框
-     */
-    showRewardModal() {
+    enrichReward: function (r) {
+        var current = this.calcRewardProgress(r.conditionType);
+        var target = typeof r.conditionValue === 'object' ? (r.conditionValue.value || 0) : (r.conditionValue || 0);
+        return Object.assign({}, r, {
+            conditionValue: target,
+            conditionLabel: this.getConditionLabel(r.conditionType, target),
+            currentProgress: current,
+            progressPct: target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0,
+        });
+    },
+    getConditionLabel: function (type, value) {
+        switch (type) {
+            case 'focus': return '专注 ' + value + ' 小时';
+            case 'tasks': return '完成 ' + value + ' 个任务';
+            case 'streak': return '连续 ' + value + ' 天';
+            case 'points': return '积分达到 ' + value;
+            default: return type + ': ' + value;
+        }
+    },
+    calcRewardProgress: function (type) {
+        var records = wx.getStorageSync('pomodoroRecords') || [];
+        var tasks = wx.getStorageSync('tasks') || [];
+        var totalSeconds = records.reduce(function (s, r) { return s + (r.duration || 0); }, 0);
+        switch (type) {
+            case 'focus': return Math.floor(totalSeconds / 3600);
+            case 'tasks': return tasks.filter(function (t) { return t.status === 'completed'; }).length;
+            case 'streak': return this.calcStreakDays();
+            case 'points': return this.data.points;
+            default: return 0;
+        }
+    },
+    calcStreakDays: function () {
+        var records = wx.getStorageSync('pomodoroRecords') || [];
+        var dates = {};
+        records.forEach(function (r) {
+            var d = (r.startTime || r.createdAt || '').slice(0, 10);
+            if (d) dates[d] = true;
+        });
+        var sorted = Object.keys(dates).sort().reverse();
+        if (sorted.length === 0) return 0;
+        var today = new Date().toISOString().slice(0, 10);
+        var streak = 0;
+        var checkDate = new Date(today);
+        for (var i = 0; i < 365; i++) {
+            var ds = checkDate.toISOString().slice(0, 10);
+            if (dates[ds]) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else if (i === 0) {
+                checkDate.setDate(checkDate.getDate() - 1);
+                continue;
+            } else {
+                break;
+            }
+        }
+        return streak;
+    },
+    showRewardEditor: function () {
         this.setData({
-            rewardModalVisible: true,
+            rewardEditorVisible: true,
+            rewardEditorMode: 'create',
+            rewardEditingId: '',
+            conditionTypeIndex: 0,
+            rewardForm: { title: '', conditionType: 'focus', conditionValue: '', description: '' },
+        });
+    },
+    editReward: function (e) {
+        var rewardId = e.currentTarget.dataset.id;
+        var reward = this.data.customRewards.find(function (r) { return r.rewardId === rewardId; });
+        if (!reward) return;
+        var typeIdx = -1;
+        for (var i = 0; i < this.data.conditionTypeOptions.length; i++) {
+            if (this.data.conditionTypeOptions[i].value === reward.conditionType) { typeIdx = i; break; }
+        }
+        this.setData({
+            rewardEditorVisible: true,
+            rewardEditorMode: 'edit',
+            rewardEditingId: rewardId,
+            conditionTypeIndex: typeIdx >= 0 ? typeIdx : 0,
             rewardForm: {
-                id: '',
-                title: '',
-                conditionIndex: 0,
-                conditionValue: '',
-                description: ''
-            }
+                title: reward.title || '',
+                conditionType: reward.conditionType || 'focus',
+                conditionValue: String(reward.conditionValue || ''),
+                description: reward.description || '',
+            },
         });
     },
-    /**
-     * 隐藏奖励模态框
-     */
-    hideRewardModal() {
-        this.setData({ rewardModalVisible: false });
+    hideRewardEditor: function () {
+        this.setData({ rewardEditorVisible: false });
     },
-    /**
-     * 保存自定义奖励
-     */
-    saveReward() {
-        const { title, conditionIndex, conditionValue, description } = this.data.rewardForm;
-        if (!title.trim()) {
-            wx.showToast({ title: '请输入奖励标题', icon: 'none' });
-            return;
-        }
-        if (!conditionValue.trim()) {
-            wx.showToast({ title: '请输入条件参数', icon: 'none' });
-            return;
-        }
-        const conditionType = ['focus', 'tasks', 'streak', 'points'][conditionIndex];
-        const conditionText = `${this.data.conditionOptions[conditionIndex]} ${conditionValue}`;
-        const newReward = {
-            id: Date.now().toString(),
-            title,
-            condition: conditionText,
-            description,
-            completed: false,
-            conditionType,
-            conditionValue: parseInt(conditionValue) || 0
-        };
-        const customRewards = [...this.data.customRewards, newReward];
-        this.setData({ customRewards });
-        wx.setStorageSync('customRewards', customRewards);
-        this.hideRewardModal();
-        wx.showToast({
-            title: '奖励已添加',
-            icon: 'success'
-        });
+    onConditionTypeChange: function (e) {
+        var idx = parseInt(e.detail.value);
+        var ct = this.data.conditionTypeOptions[idx];
+        this.setData({ conditionTypeIndex: idx, 'rewardForm.conditionType': ct.value });
     },
-    /**
-     * 领取奖励
-     */
-    claimReward(e) {
-        const id = e.currentTarget.dataset.id;
-        const reward = this.data.customRewards.find(r => r.id === id);
-        if (!reward)
-            return;
-        // 检查条件是否满足
-        const isCompleted = this.checkRewardCondition(reward);
-        if (!isCompleted) {
-            wx.showToast({
-                title: '条件尚未满足',
-                icon: 'none'
+    saveReward: function () {
+        var _this = this;
+        var _a = this.data.rewardForm, title = _a.title, conditionType = _a.conditionType, conditionValue = _a.conditionValue, description = _a.description;
+        if (!title.trim()) { wx.showToast({ title: '请输入奖励标题', icon: 'none' }); return; }
+        if (!conditionValue || isNaN(Number(conditionValue)) || Number(conditionValue) <= 0) {
+            wx.showToast({ title: '请输入有效的目标值', icon: 'none' }); return;
+        }
+        this.setData({ rewardSaving: true });
+        var data = { title: title.trim(), conditionType: conditionType, conditionValue: Number(conditionValue), description: description.trim() };
+        if (this.data.rewardEditorMode === 'edit') {
+            api_1.api.updateCustomReward(this.data.rewardEditingId, data).then(function () {
+                var list = _this.data.customRewards.map(function (r) {
+                    return r.rewardId === _this.data.rewardEditingId ? _this.enrichReward(Object.assign({}, r, data)) : r;
+                });
+                _this.setData({ customRewards: list, rewardSaving: false });
+                wx.setStorageSync('customRewards', list);
+                wx.showToast({ title: '奖励已更新', icon: 'success' });
+                _this.hideRewardEditor();
+            }).catch(function (err) {
+                _this.setData({ rewardSaving: false });
+                wx.showToast({ title: err.message || '保存失败', icon: 'none' });
             });
+        } else {
+            api_1.api.createCustomReward(data).then(function (created) {
+                var list = [_this.enrichReward(created)].concat(_this.data.customRewards);
+                _this.setData({ customRewards: list, rewardSaving: false });
+                wx.setStorageSync('customRewards', list);
+                wx.showToast({ title: '奖励已添加', icon: 'success' });
+                _this.hideRewardEditor();
+            }).catch(function (err) {
+                _this.setData({ rewardSaving: false });
+                wx.showToast({ title: err.message || '保存失败', icon: 'none' });
+            });
+        }
+    },
+    deleteReward: function (e) {
+        var _this = this;
+        var rewardId = e.currentTarget.dataset.id;
+        var reward = this.data.customRewards.find(function (r) { return r.rewardId === rewardId; });
+        if (!reward) return;
+        wx.showModal({
+            title: '删除奖励',
+            content: '确定要删除「' + reward.title + '」吗？',
+            confirmColor: '#FA5151',
+            success: function (res) {
+                if (!res.confirm) return;
+                api_1.api.deleteCustomReward(rewardId).catch(function () { });
+                var list = _this.data.customRewards.filter(function (r) { return r.rewardId !== rewardId; });
+                _this.setData({ customRewards: list });
+                wx.setStorageSync('customRewards', list);
+                wx.showToast({ title: '已删除', icon: 'success' });
+            },
+        });
+    },
+    claimReward: function (e) {
+        var rewardId = e.currentTarget.dataset.id;
+        var reward = this.data.customRewards.find(function (r) { return r.rewardId === rewardId; });
+        if (!reward || reward.isCompleted) return;
+        if (reward.progressPct < 100) {
+            wx.showToast({ title: '还差一点！进度 ' + reward.progressPct + '%', icon: 'none' });
             return;
         }
-        // 标记为已完成
-        const customRewards = this.data.customRewards.map(r => r.id === id ? Object.assign(Object.assign({}, r), { completed: true }) : r);
-        this.setData({ customRewards });
-        // 发放奖励（这里可以增加积分等）
-        const newPoints = this.data.points + 100; // 示例奖励100积分
-        this.setData({ points: newPoints });
-        wx.setStorageSync('customRewards', customRewards);
+        var list = this.data.customRewards.map(function (r) {
+            return r.rewardId === rewardId ? Object.assign({}, r, { isCompleted: true, completedAt: new Date().toISOString() }) : r;
+        });
+        var bonusPoints = 100;
+        this.setData({ customRewards: list, points: this.data.points + bonusPoints });
+        wx.setStorageSync('customRewards', list);
         wx.showModal({
-            title: '奖励领取成功',
-            content: `恭喜获得 "${reward.title}"！\n积分+100`,
-            showCancel: false
+            title: '奖励领取成功！',
+            content: '恭喜达成「' + reward.title + '」！\n积分 +' + bonusPoints,
+            showCancel: false,
         });
     },
-    /**
-     * 检查奖励条件是否满足
-     */
-    checkRewardCondition(_reward) {
-        // 简化：随机返回是否满足
-        // 实际应该根据用户数据判断
-        return Math.random() > 0.5;
-    },
-    /**
-     * 表单输入处理
-     */
-    onRewardTitleInput(e) {
-        this.setData({
-            'rewardForm.title': e.detail.value
-        });
-    },
-    onConditionChange(e) {
-        this.setData({
-            'rewardForm.conditionIndex': e.detail.value
-        });
-    },
-    onConditionValueInput(e) {
-        this.setData({
-            'rewardForm.conditionValue': e.detail.value
-        });
-    },
-    onRewardDescInput(e) {
-        this.setData({
-            'rewardForm.description': e.detail.value
-        });
-    }
+    onRewardTitleInput: function (e) { this.setData({ 'rewardForm.title': e.detail.value }); },
+    onRewardValueInput: function (e) { this.setData({ 'rewardForm.conditionValue': e.detail.value }); },
+    onRewardDescInput: function (e) { this.setData({ 'rewardForm.description': e.detail.value }); },
 });

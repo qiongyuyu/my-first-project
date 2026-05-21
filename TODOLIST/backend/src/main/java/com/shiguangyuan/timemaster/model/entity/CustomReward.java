@@ -1,5 +1,6 @@
 package com.shiguangyuan.timemaster.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -27,6 +28,7 @@ public class CustomReward {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
+    @JsonIgnore
     private User user;
 
     @Column(length = 128, nullable = false)

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     union_id     VARCHAR(64)  NULL UNIQUE COMMENT '微信UnionID',
     nick_name    VARCHAR(64)  NOT NULL COMMENT '用户昵称',
     avatar_url   VARCHAR(512) NULL COMMENT '头像URL',
+    password     VARCHAR(128) NULL COMMENT 'BCrypt加密密码',
     gender       TINYINT      NOT NULL DEFAULT 0 COMMENT '性别: 0未知 1男 2女',
     points       INT          NOT NULL DEFAULT 0 COMMENT '积分',
     experience   INT          NOT NULL DEFAULT 0 COMMENT '经验值',
@@ -239,46 +240,46 @@ CREATE TABLE IF NOT EXISTS system_configs (
 -- ============================================================
 INSERT INTO badges (badge_id, name, description, icon_url, condition_type, condition_value, rarity, reward_points, reward_exp) VALUES
 ('badge_001', '初窥门径', '完成第一个番茄钟', '/images/badges/first-pomo.png',
- 'pomodoro_count', '{"count": 1}', 'common', 50, 10),
+ 'pomodoro_count', '{"count": 1}', 'COMMON', 50, 10),
 ('badge_002', '持之以恒', '连续7天专注', '/images/badges/streak-7.png',
- 'consecutive_days', '{"days": 7}', 'rare', 100, 30),
+ 'consecutive_days', '{"days": 7}', 'RARE', 100, 30),
 ('badge_003', '效率达人', '单日完成8个番茄钟', '/images/badges/daily-8.png',
- 'daily_pomodoros', '{"count": 8}', 'rare', 150, 40),
+ 'daily_pomodoros', '{"count": 8}', 'RARE', 150, 40),
 ('badge_004', '任务大师', '完成50个任务', '/images/badges/task-50.png',
- 'task_count', '{"count": 50}', 'epic', 200, 60),
+ 'task_count', '{"count": 50}', 'EPIC', 200, 60),
 ('badge_005', '早起鸟儿', '早上6点前开始专注', '/images/badges/early-bird.png',
- 'early_start', '{"before_hour": 6}', 'common', 50, 10),
+ 'early_start', '{"before_hour": 6}', 'COMMON', 50, 10),
 ('badge_006', '深夜工作者', '晚上11点后仍在专注', '/images/badges/night-owl.png',
- 'late_work', '{"after_hour": 23}', 'common', 50, 10),
+ 'late_work', '{"after_hour": 23}', 'COMMON', 50, 10),
 ('badge_007', '时间大师', '累计专注100小时', '/images/badges/total-100h.png',
- 'total_hours', '{"hours": 100}', 'epic', 300, 100),
+ 'total_hours', '{"hours": 100}', 'EPIC', 300, 100),
 ('badge_008', '社交达人', '添加5个好友', '/images/badges/friends-5.png',
- 'friend_count', '{"count": 5}', 'rare', 100, 20),
+ 'friend_count', '{"count": 5}', 'RARE', 100, 20),
 ('badge_009', '团队协作者', '加入一个团队', '/images/badges/team-join.png',
- 'join_team', '{"count": 1}', 'common', 50, 10),
+ 'join_team', '{"count": 1}', 'COMMON', 50, 10),
 ('badge_010', '周冠军', '一周专注时长排名团队第一', '/images/badges/weekly-champion.png',
- 'team_rank', '{"rank": 1, "period": "week"}', 'legendary', 500, 150);
+ 'team_rank', '{"rank": 1, "period": "week"}', 'LEGENDARY', 500, 150);
 
 -- ============================================================
 -- 种子数据 - 抽卡道具
 -- ============================================================
 INSERT INTO items (item_id, name, description, icon_url, rarity, effect_type, effect_value, price, is_active) VALUES
 ('item_001', '专注药剂', '使用后下次专注效率提升10%', '/images/items/potion.png',
- 'common', 'focus_boost', '{"boost_percent": 10}', 50, TRUE),
+ 'COMMON', 'focus_boost', '{"boost_percent": 10}', 50, TRUE),
 ('item_002', '能量咖啡', '使用后专注25分钟可获得额外5积分', '/images/items/coffee.png',
- 'common', 'points_boost', '{"extra_points": 5}', 50, TRUE),
+ 'COMMON', 'points_boost', '{"extra_points": 5}', 50, TRUE),
 ('item_003', '时间沙漏', '使用后可跳过当前休息时间', '/images/items/hourglass.png',
- 'rare', 'skip_break', '{}', 100, TRUE),
+ 'RARE', 'skip_break', '{}', 100, TRUE),
 ('item_004', '星辰主题', '解锁星空调色板主题', '/images/items/starry-theme.png',
- 'rare', 'unlock_theme', '{"theme": "starry"}', 120, TRUE),
+ 'RARE', 'unlock_theme', '{"theme": "starry"}', 120, TRUE),
 ('item_005', 'AI规划助手', '使用后获得一次高级AI任务拆解', '/images/items/ai-assist.png',
- 'epic', 'ai_breakdown', '{"level": "advanced"}', 200, TRUE),
+ 'EPIC', 'ai_breakdown', '{"level": "advanced"}', 200, TRUE),
 ('item_006', '双倍积分卡', '使用后1小时内积分获取翻倍', '/images/items/double-points.png',
- 'epic', 'double_points', '{"duration_hours": 1}', 200, TRUE),
+ 'EPIC', 'double_points', '{"duration_hours": 1}', 200, TRUE),
 ('item_007', '时光罗盘', '获得一次免费的十连抽机会', '/images/items/compass.png',
- 'legendary', 'free_draw', '{"draw_type": "multi"}', 500, TRUE),
+ 'LEGENDARY', 'free_draw', '{"draw_type": "multi"}', 500, TRUE),
 ('item_008', '重置之书', '重置一个任务的进度并返还番茄数', '/images/items/reset-book.png',
- 'legendary', 'reset_task', '{}', 500, TRUE);
+ 'LEGENDARY', 'reset_task', '{}', 500, TRUE);
 
 -- ============================================================
 -- 种子数据 - 系统配置

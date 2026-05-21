@@ -1,6 +1,7 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // pages/settings/settings.ts
-const settingsApp = getApp();
+const api_1 = require("../../utils/api");
 Page({
     /**
      * 页面的初始数据
@@ -11,7 +12,7 @@ Page({
             nickName: '',
             avatarUrl: ''
         },
-        userId: 'user_' + Date.now().toString().slice(-8),
+        userId: '',
         // 外观设置
         theme: 'light',
         fontSize: 16,
@@ -26,8 +27,12 @@ Page({
         cacheSize: '0.0 MB',
         syncStatus: 'success',
         syncStatusText: '已同步',
+        syncLoading: false,
         // 关于
-        version: '1.0.0'
+        version: '1.0.0',
+        // 按钮状态
+        saving: false,
+        loggingOut: false,
     },
     /**
      * 生命周期函数--监听页面加载
@@ -38,20 +43,32 @@ Page({
     /**
      * 加载设置
      */
-    loadSettings() {
-        // 加载用户信息
-        const userInfo = wx.getStorageSync('userInfo') || {};
-        this.setData({ userInfo });
-        // 加载外观设置
-        const settings = wx.getStorageSync('settings') || {};
-        this.setData({
-            theme: settings.theme || 'light',
-            fontSize: settings.fontSize || 16,
-            notifications: settings.notifications || this.data.notifications
-        });
-        // 计算缓存大小
+    async loadSettings() {
+        var _a, _b, _c;
+        try {
+            const user = await api_1.api.getUserProfile();
+            this.setData({
+                userId: user.userId,
+                userInfo: { nickName: user.nickName, avatarUrl: user.avatarUrl },
+                theme: ((_a = user.settings) === null || _a === void 0 ? void 0 : _a.theme) || 'light',
+                fontSize: ((_b = user.settings) === null || _b === void 0 ? void 0 : _b.fontSize) || 16,
+                notifications: ((_c = user.settings) === null || _c === void 0 ? void 0 : _c.notifications) || this.data.notifications,
+            });
+            wx.setStorageSync('userInfo', { nickName: user.nickName, avatarUrl: user.avatarUrl });
+            wx.setStorageSync('settings', user.settings || {});
+        }
+        catch (_d) {
+            const userInfo = wx.getStorageSync('userInfo') || {};
+            const settings = wx.getStorageSync('settings') || {};
+            this.setData({
+                userId: settings.userId || 'unknown',
+                userInfo,
+                theme: settings.theme || 'light',
+                fontSize: settings.fontSize || 16,
+                notifications: settings.notifications || this.data.notifications,
+            });
+        }
         this.calculateCacheSize();
-        // 检查同步状态
         this.checkSyncStatus();
     },
     /**
@@ -109,15 +126,18 @@ Page({
      * 更换头像
      */
     changeAvatar() {
+        var _this = this;
         wx.chooseMedia({
             count: 1,
             mediaType: ['image'],
             sourceType: ['album', 'camera'],
-            success: (res) => {
-                const tempFilePath = res.tempFiles[0].tempFilePath;
-                const userInfo = Object.assign(Object.assign({}, this.data.userInfo), { avatarUrl: tempFilePath });
-                this.setData({ userInfo });
+            success: function (res) {
+                var tempFilePath = res.tempFiles[0].tempFilePath;
+                var userInfo = Object.assign(Object.assign({}, _this.data.userInfo), { avatarUrl: tempFilePath });
+                _this.setData({ userInfo: userInfo });
                 wx.setStorageSync('userInfo', userInfo);
+                api_1.api.updateUserProfile({ avatarUrl: tempFilePath }).catch(function () { });
+                wx.showToast({ title: '头像已更新', icon: 'success' });
             }
         });
     },
@@ -301,23 +321,29 @@ Page({
      * 立即同步
      */
     syncData() {
-        this.setData({
-            syncStatus: 'pending',
-            syncStatusText: '同步中...'
-        });
-        // 模拟同步过程
-        setTimeout(() => {
-            // 清空离线队列
-            wx.setStorageSync('offlineQueue', []);
-            this.setData({
-                syncStatus: 'success',
-                syncStatusText: '已同步'
+        var _this = this;
+        if (this.data.syncLoading) return;
+        this.setData({ syncLoading: true, syncStatus: 'pending', syncStatusText: '同步中...' });
+        try {
+            var offlineQueue = wx.getStorageSync('offlineQueue') || [];
+            var pomodoroRecords = offlineQueue.filter(function (op) { return op.type === 'pomodoro'; });
+            var promises = [];
+            if (pomodoroRecords.length > 0) {
+                promises.push(api_1.api.batchSyncPomodoros(pomodoroRecords.map(function (op) { return op.data; })));
+            }
+            promises.push(api_1.api.updateUserProfile({ nickName: _this.data.userInfo.nickName, avatarUrl: _this.data.userInfo.avatarUrl }).catch(function () { }));
+            promises.push(api_1.api.updateUserSettings({ theme: _this.data.theme, fontSize: _this.data.fontSize, notifications: _this.data.notifications }).catch(function () { }));
+            Promise.all(promises).then(function () {
+                wx.setStorageSync('offlineQueue', []);
+                _this.setData({ syncStatus: 'success', syncStatusText: '已同步', syncLoading: false });
+                wx.showToast({ title: '已同步', icon: 'success' });
+            }).catch(function () {
+                _this.setData({ syncStatus: 'failed', syncStatusText: '失败', syncLoading: false });
+                wx.showToast({ title: '同步失败', icon: 'none' });
             });
-            wx.showToast({
-                title: '同步完成',
-                icon: 'success'
-            });
-        }, 2000);
+        } catch (_e) {
+            this.setData({ syncStatus: 'failed', syncStatusText: '同步失败', syncLoading: false });
+        }
     },
     /**
      * 查看版本
@@ -359,34 +385,47 @@ Page({
      * 保存所有设置
      */
     saveAllSettings() {
-        const settings = wx.getStorageSync('settings') || {};
+        var _this = this;
+        if (this.data.saving) return;
+        this.setData({ saving: true });
+        var settings = wx.getStorageSync('settings') || {};
         settings.theme = this.data.theme;
         settings.fontSize = this.data.fontSize;
         settings.notifications = this.data.notifications;
         wx.setStorageSync('settings', settings);
         wx.setStorageSync('userInfo', this.data.userInfo);
-        wx.showToast({
-            title: '所有设置已保存',
-            icon: 'success'
+        Promise.all([
+            api_1.api.updateUserProfile({ nickName: this.data.userInfo.nickName, avatarUrl: this.data.userInfo.avatarUrl }),
+            api_1.api.updateUserSettings({ theme: this.data.theme, fontSize: this.data.fontSize, notifications: this.data.notifications }),
+        ]).then(function () {
+            _this.setData({ saving: false });
+            wx.showToast({ title: '已保存', icon: 'success' });
+        }).catch(function () {
+            _this.setData({ saving: false });
+            wx.showToast({ title: '已保存', icon: 'success' });
         });
     },
     /**
      * 退出登录
      */
     logout() {
+        var _this = this;
+        if (this.data.loggingOut) return;
         wx.showModal({
             title: '退出登录',
-            content: '确定要退出登录吗？',
-            success: (res) => {
-                if (res.confirm) {
-                    // 清除用户相关数据
-                    wx.removeStorageSync('userInfo');
-                    wx.removeStorageSync('token');
-                    // 跳转到登录页或首页
-                    wx.reLaunch({
-                        url: '/pages/focus-timer/focus-timer'
-                    });
-                }
+            content: '确定退出登录？',
+            confirmText: '退出',
+            confirmColor: '#FA5151',
+            success: function (res) {
+                if (!res.confirm) return;
+                _this.setData({ loggingOut: true });
+                var app = getApp();
+                app.globalData.token = null;
+                app.globalData.userInfo = null;
+                wx.removeStorageSync('token');
+                wx.removeStorageSync('userInfo');
+                _this.setData({ loggingOut: false });
+                wx.reLaunch({ url: '/pages/login/login' });
             }
         });
     }

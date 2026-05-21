@@ -292,44 +292,75 @@ Page({
             icon: 'success'
         });
     },
-
     // ═══════════════════════════════════════
     //  AI 智能对话
     // ═══════════════════════════════════════
-
+    /**
+     * 切换对话面板显示/隐藏
+     */
     toggleChat() {
         this.setData({ chatVisible: !this.data.chatVisible });
+        // 打开时如果有任务信息，自动发送任务上下文
         if (this.data.chatVisible && this.data.chatMessages.length === 0) {
             this.addChatMessage('ai', '你好！我是你的AI规划助手。我可以帮你分析任务优先级、提供时间管理建议、拆解复杂任务。你有什么需要帮助的吗？');
         }
     },
-
+    /**
+     * 监听聊天输入
+     */
     onChatInput(e) {
         this.setData({ chatInput: e.detail.value });
     },
-
+    /**
+     * 发送消息
+     */
     sendMessage() {
         const content = this.data.chatInput.trim();
         if (!content || this.data.chatLoading)
             return;
+        // 添加用户消息
         this.addChatMessage('user', content);
         this.setData({ chatInput: '' });
+        // 调用AI接口
         this.callAIApi(content);
     },
-
+    /**
+     * 添加消息到列表
+     */
     addChatMessage(role, content) {
         const messages = [...this.data.chatMessages, {
-            id: Date.now().toString(),
-            role,
-            content,
-            time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-        }];
+                id: Date.now().toString(),
+                role,
+                content,
+                time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+            }];
         this.setData({ chatMessages: messages });
     },
-
+    /**
+     * 调用AI接口（接入API时修改此方法）
+     * 当前使用模拟回复，接入真实API时替换为 wx.request 调用
+     */
     callAIApi(userMessage) {
         this.setData({ chatLoading: true });
         // === 替换为真实 API 调用 ===
+        // wx.request({
+        //   url: 'https://your-api.com/chat',
+        //   method: 'POST',
+        //   data: {
+        //     message: userMessage,
+        //     tasks: this.loadTasks(),   // 附带当前任务列表供AI参考
+        //   },
+        //   success: (res) => {
+        //     this.addChatMessage('ai', res.data.reply);
+        //   },
+        //   fail: () => {
+        //     this.addChatMessage('ai', '抱歉，我现在暂时无法回复，请稍后再试。');
+        //   },
+        //   complete: () => {
+        //     this.setData({ chatLoading: false });
+        //   }
+        // });
+        // 模拟AI回复
         setTimeout(() => {
             let reply = '';
             if (userMessage.includes('紧急') || userMessage.includes('优先级')) {
@@ -381,5 +412,5 @@ Page({
             this.addChatMessage('ai', reply);
             this.setData({ chatLoading: false });
         }, 1000);
-    }
+    },
 });

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.Map;
 
 @Data
 @Builder
@@ -17,5 +16,5 @@ public class CreateCustomRewardRequest {
     private String description;
     @NotBlank(message = "条件类型不能为空")
     private String conditionType;
-    private Map<String, Object> conditionValue;
+    private Object conditionValue;
 }

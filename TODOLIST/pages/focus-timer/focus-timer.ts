@@ -1,4 +1,6 @@
 // pages/focus-timer/focus-timer.ts
+import { api } from '../../utils/api';
+
 const appInstance = getApp<IAppOption>();
 
 // 励志语录库
@@ -119,9 +121,36 @@ Page({
     this.saveTimerState();
   },
 
-  loadTasks() {
-    const tasks = wx.getStorageSync('tasks') || [];
-    this.setData({ tasks });
+  async loadTasks() {
+    try {
+      const result = await api.getTasks();
+      // 适配后端 PageResponse(items) 和前端 Task 接口的字段差异
+      const list = result.tasks || result.items || [];
+      const tasks: Task[] = list.map((t: any) => this.mapToTask(t));
+      this.setData({ tasks });
+      wx.setStorageSync('tasks', tasks);
+    } catch {
+      const tasks = wx.getStorageSync('tasks') || [];
+      this.setData({ tasks });
+    }
+  },
+
+  mapToTask(t: any): Task {
+    const priorityMap: Record<string, string> = { low: '低', medium: '中', high: '高' };
+    return {
+      id: t.taskId || t.id,
+      title: t.title,
+      estimatedPomos: t.estimatedPomos || 1,
+      completedPomos: t.completedPomos || 0,
+      progress: t.progress || 0,
+      priority: t.priority || 'medium',
+      priorityText: priorityMap[t.priority] || '中',
+      duration: t.duration || 25,
+      status: t.status || 'pending',
+      createdAt: typeof t.createdAt === 'string' ? new Date(t.createdAt).getTime() : (t.createdAt || Date.now()),
+      deadline: t.deadline || undefined,
+      description: t.description || undefined,
+    };
   },
 
   saveTasks() {
@@ -314,7 +343,10 @@ Page({
       if (task.id === taskId) {
         const completedPomos = (task.completedPomos || 0) + 1;
         const progress = Math.min(100, Math.floor((completedPomos / task.estimatedPomos) * 100));
-        return { ...task, completedPomos, progress, status: progress >= 100 ? 'completed' : task.status };
+        const status = progress >= 100 ? 'completed' : task.status;
+        // 同步到后端
+        api.updateTask(taskId, { completedPomos, progress, status }).catch(() => {});
+        return { ...task, completedPomos, progress, status };
       }
       return task;
     });
@@ -396,10 +428,10 @@ Page({
 
   /**
    * 保存任务：
-   * - 编辑模式：仅保存，留在列表页
-   * - 新建模式：保存并立即开始番茄钟
+   * - 编辑模式：更新到后端 + 本地
+   * - 新建模式：创建到后端 + 本地，然后开始计时
    */
-  saveTask() {
+  async saveTask() {
     const { title, estimatedPomoIndex, priorityIndex, durationIndex, id } = this.data.taskForm;
 
     if (!title.trim()) {
@@ -412,23 +444,31 @@ Page({
     const priorityText = this.data.priorityOptions[priorityIndex];
     const duration = parseInt(this.data.durationOptions[durationIndex]);
 
-    let tasks = [...this.data.tasks];
-
     if (this.data.isEditing && id) {
-      tasks = tasks.map(task =>
+      // 编辑模式：更新本地 + 后端
+      const apiData = {
+        title,
+        priority,
+        estimatedPomos,
+        description: this.data.taskForm.description || undefined,
+        deadline: this.data.taskForm.deadline || undefined,
+      };
+      let tasks = this.data.tasks.map(task =>
         task.id === id ? { ...task, title, estimatedPomos, priority, priorityText, duration, deadline: this.data.taskForm.deadline || undefined, description: this.data.taskForm.description || undefined } : task
       );
       this.setData({ tasks });
       this.saveTasks();
       this.hideTaskModal();
+      try { await api.updateTask(id, apiData); } catch (e: any) { console.error('updateTask fail:', e.message); }
     } else {
-      // 新建任务后立即开始计时
+      // 新建模式：保存到后端 + 本地，然后开始计时
       if (this.data.timerRunning || this.data.timerState === TimerState.PAUSED) {
         wx.showToast({ title: '当前有专注进行中', icon: 'none' });
         return;
       }
+      const localId = Date.now().toString();
       const newTask: Task = {
-        id: Date.now().toString(),
+        id: localId,
         title,
         estimatedPomos,
         completedPomos: 0,
@@ -441,7 +481,7 @@ Page({
         deadline: this.data.taskForm.deadline || undefined,
         description: this.data.taskForm.description || undefined,
       };
-      tasks.unshift(newTask);
+      const tasks = [newTask, ...this.data.tasks];
       this.setData({
         tasks,
         selectedTaskId: newTask.id,
@@ -452,16 +492,31 @@ Page({
       });
       this.saveTasks();
       this.hideTaskModal();
+
+      // 同步到后端
+      const apiData = { title, priority, estimatedPomos };
+      try {
+        const created = await api.createTask(apiData);
+        if (created && created.taskId) {
+          const synced = this.data.tasks.map(t => t.id === localId ? { ...t, id: created.taskId } : t);
+          this.setData({ tasks: synced, selectedTaskId: created.taskId });
+          this.saveTasks();
+        }
+      } catch (e: any) {
+        console.error('createTask fail:', e.message);
+        wx.showToast({ title: '任务已本地保存', icon: 'none' });
+      }
+
       this.startTimer();
     }
   },
 
-  deleteTask(e: any) {
+  async deleteTask(e: any) {
     const taskId = e.currentTarget.dataset.id;
     wx.showModal({
       title: '确认删除',
       content: '删除后无法恢复，确定删除吗？',
-      success: (res: any) => {
+      success: async (res: any) => {
         if (res.confirm) {
           const tasks = this.data.tasks.filter((task: Task) => task.id !== taskId);
           this.setData({ tasks });
@@ -469,6 +524,7 @@ Page({
           if (this.data.selectedTaskId === taskId) {
             this.setData({ selectedTaskId: null, currentTaskTitle: '', estimatedPomos: 1 });
           }
+          try { await api.deleteTask(taskId); } catch { /* 后端同步失败，本地已删 */ }
         }
       }
     });

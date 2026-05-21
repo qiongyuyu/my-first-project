@@ -38,6 +38,10 @@ public class User {
     @Column(name = "avatar_url", length = 512)
     private String avatarUrl;
 
+    @Column(name = "password", length = 128)
+    @ToString.Exclude
+    private String password;
+
     @Column(nullable = false)
     @Builder.Default
     private Integer gender = 0;
