@@ -14,7 +14,7 @@
 - **前端**：微信小程序原生开发（WXML + WXSS + TypeScript）
 - **后端**：Java Spring Boot（RESTful API）
 - **数据库**：MySQL 8.0+
-- **AI服务**：腾讯混元大模型API
+- **AI服务**：DeepSeek API
 - **部署**：微信云托管
 
 ## 项目结构
